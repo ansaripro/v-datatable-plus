@@ -1,0 +1,56 @@
+{
+  "name": "v-datatable-plus",
+  "private": false,
+  "version": "0.0.1",
+  "type": "module",
+  "keywords": [
+    "datatable",
+    "plus",
+    "rich",
+    "pro",
+    "vuetify",
+    "vue3",
+    "vue",
+    "vuejs"
+  ],
+  "files": [
+    "dist",
+    "src/components/"
+  ],
+  "main": "./dist/vuetify-datatable-plus.umd.cjs",
+  "module": "./dist/vuetify-datatable-plus.js",
+  "exports": {
+    ".": {
+      "import": "./dist/vuetify-datatable-plus.js",
+      "require": "./dist/vuetify-datatable-plus.umd.cjs"
+    },
+    "./dist/style.css": {
+      "import": "./dist/style.css",
+      "require": "./dist/style.css"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ansaripro/VDataTablePlus.git"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "axios": "^1.6.7",
+    "vue": "^3.3.11",
+    "vuedraggable": "^4.1.0",
+    "vuetify": "^3.5.1"
+  },
+  "peerDependencies": {
+    "vue": "^3.3.11",
+    "vuedraggable": "^4.1.0",
+    "vuetify": "^3.5.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^4.5.2",
+    "vite": "^5.0.8"
+  }
+}
