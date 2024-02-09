@@ -82,9 +82,15 @@ const props = defineProps({
         type: [String, Number],
         default: '50vh',
     },
+    loading: {
+        type: [String, Boolean],
+        default: false,
+    },
     title: String,
+    color: String,
     itemValue: String,
     headerTextSize: String,
+    headerIconSize: String,
     fileName: String,
     sortByColumn: String,
     modelValue: {
@@ -131,7 +137,7 @@ const props = defineProps({
     },
     dragMenuIcon: {
         type: String,
-        default: 'mdi-table-column',
+        default: '$menu',
     },
     dragItemIcon: {
         type: String,
@@ -139,11 +145,19 @@ const props = defineProps({
     },
     refreshIcon: {
         type: String,
-        default: 'mdi-refresh',
+        default: '$loading',
     },
     filterIcon: {
         type: String,
         default: 'mdi-filter',
+    },
+    sortAscIcon: {
+        type: String,
+        default: '$sortAsc',
+    },
+    sortDescIcon: {
+        type: String,
+        default: '$sortDesc',
     },
     groupByIcon: {
         type: String,
@@ -156,6 +170,22 @@ const props = defineProps({
     groupSortDescIcon: {
         type: String,
         default: 'mdi-sort-descending',
+    },
+    firstIcon: {
+        type: String,
+        default: '$first',
+    },
+    lastIcon: {
+        type: String,
+        default: '$last',
+    },
+    nextIcon: {
+        type: String,
+        default: '$next',
+    },
+    prevIcon: {
+        type: String,
+        default: '$prev',
     },
 });
 
@@ -270,6 +300,11 @@ const localHeaderTextSize = computed(() => {
     if (props.headerTextSize?.length > 0) return { fontSize: props.headerTextSize };
 });
 
+const localHeaderIconSize = computed(() => {
+    if (props.headerIconSize?.length > 0) return { fontSize: props.headerIconSize };
+    else return { fontSize: '12px' };
+});
+
 // methods
 function getHeaders(columns) {
     if (columns && columns.length > 0) {
@@ -338,21 +373,21 @@ function headerStyle(column) {
     }
     return {};
 }
-function rowClick($event, props) {
-    emit('row', { $event, props });
+function rowClick($event, param) {
+    emit('row', { $event, param });
     if (props.highlightRow) lastSelectedRowNode.value?.classList.remove('dt-row-highlight');
     // Click same row again
     if (lastSelectedRowNode.value === $event.currentTarget) {
-        if (props.isSelected(props.internalItem)) props.toggleSelect(props.internalItem);
+        if (param.isSelected(param.internalItem)) param.toggleSelect(param.internalItem);
         lastSelectedRowNode.value = null;
         localSelectedRow.value = null;
         return;
     }
     lastSelectedRowNode.value = $event.currentTarget;
 
-    if (!props.isSelected(props.internalItem)) props.toggleSelect(props.internalItem);
-    if (props.returnObject) localSelectedRow.value = props.item;
-    if (props.itemValue?.length > 0) localSelectedRow.value = props.item?.[props.itemValue] ?? null;
+    if (!param.isSelected(param.internalItem)) param.toggleSelect(param.internalItem);
+    if (props.returnObject) localSelectedRow.value = param.item;
+    if (props.itemValue?.length > 0) localSelectedRow.value = param.item?.[props.itemValue] ?? null;
     if (props.highlightRow) lastSelectedRowNode.value?.classList.add('dt-row-highlight');
 }
 function matchFilter(type, value, searchVal) {
@@ -456,12 +491,12 @@ function print() {
 </script>
 
 <template>
-    <v-card variant="outlined" color="primary">
+    <v-card variant="outlined" :color="color">
         <v-toolbar density="compact">
             <v-menu v-if="!hideColumnMenu" :close-on-content-click="false"
                 @update:modelValue="$emit('columnMenuOpened', $event)">
                 <template v-slot:activator="{ props }">
-                    <v-btn size="small" color="primary" :icon="dragMenuIcon" v-bind="props" />
+                    <v-btn size="small" :color="color" :icon="dragMenuIcon" v-bind="props" />
                 </template>
                 <v-list density="compact" lines="one" :max-height="dragMenuHeight">
                     <Draggable v-model="localHeaders" item-key="key" handle=".cursor-move"
@@ -470,7 +505,7 @@ function print() {
                             <v-list-item>
                                 <template v-slot:prepend>
                                     <v-list-item-action start>
-                                        <v-checkbox-btn color="primary" v-model="element.isShow"
+                                        <v-checkbox-btn :color="color" v-model="element.isShow"
                                             @change="$emit('columnMenuChecked', { element, $event })" />
                                     </v-list-item-action>
                                 </template>
@@ -498,7 +533,8 @@ function print() {
                     :density="density" :headers="tableHeaders" :items="filteredItems" :group-by="groupByColumn"
                     :show-expand="showExpand" :show-select="showSelect" :select-strategy="selectStrategy"
                     :return-object="returnObject" :item-value="itemValue" :items-per-page="pagination.itemsPerPage"
-                    :row-props="rowProps" v-model:page="pagination.page" v-model="dtModel" @click:row="rowClick">
+                    :row-props="rowProps" :sort-asc-icon="sortAscIcon" :sort-desc-icon="sortDescIcon" :loading="loading" :color="color"
+                    v-model:page="pagination.page" v-model="dtModel" @click:row="rowClick">
                     <template v-slot:top="props">
                         <slot v-bind="props" name="top"/>
                     </template>
@@ -516,16 +552,15 @@ function print() {
                                                         column.title }}</span>
                                                 <span v-else :style="localHeaderTextSize">{{ column.title }}</span>
                                                 <template v-if="props.isSorted(column)">
-                                                    <v-icon size="x-small" :icon="props.getSortIcon(column)"
-                                                        aria-hidden="false" />
+                                                    <v-icon :style="localHeaderIconSize" :icon="props.getSortIcon(column)"/>
                                                 </template>
                                                 <template v-if="checkIsGroupable(column)">
                                                     <v-icon v-if="checkIsGroupBy(column.key)" class="cursor-pointer"
-                                                        size="x-small" aria-hidden="false"
+                                                        :style="localHeaderIconSize"
                                                         :icon="getGroupSortIcon(column.key)"
-                                                        @click="sortByGroup(column.key)" />
-                                                    <v-icon v-else size="x-small" class="cursor-pointer" :icon="groupByIcon"
-                                                        aria-hidden="false" @click="onGroupBy(column.key)" />
+                                                        @click="sortByGroup(column.key)"/>
+                                                    <v-icon v-else :style="localHeaderIconSize" class="cursor-pointer" :icon="groupByIcon"
+                                                        @click="onGroupBy(column.key)" />
                                                 </template>
                                             </th>
                                             <th class="bg-grey-lighten-4 dt-header-border" :rowspan="column.rowspan"
@@ -543,7 +578,7 @@ function print() {
                                 v-for="(column, index) in getHeaders(props.columns)" :key="index">
                                 <template v-if="column.filterable !== false">
                                     <v-select hide-details center-affix v-if="column.filterMode === FILTER_MODE.SELECTION"
-                                        variant="plain" density="compact" color="primary" item-value="value"
+                                        variant="plain" density="compact" :color="color" item-value="value"
                                         item-title="title" :items="column.filterItems" v-model="column.filterValue"
                                         :list-props="{
                                             lines: false,
@@ -554,10 +589,10 @@ function print() {
                                         <template v-slot:append>
                                             <v-menu>
                                                 <template v-slot:activator="{ props }">
-                                                    <v-btn color="primary" variant="text" size="x-small" :icon="filterIcon"
+                                                    <v-btn :color="color" variant="text" size="x-small" :icon="filterIcon"
                                                         v-bind="props" />
                                                 </template>
-                                                <v-list density="compact" :lines="false" color="primary">
+                                                <v-list density="compact" :lines="false" :color="color">
                                                     <v-list-item v-for="filter in filterTypes" :key="filter.value"
                                                         :title="filter.title" :active="column.filterType === filter.value"
                                                         @click="column.filterType = filter.value" />
@@ -607,8 +642,9 @@ function print() {
                                     v-model="pagination.itemsPerPage" item-title="title" item-value="value"
                                     :items="itemsPerPageOptions" @update:model-value="pagination.page = 1" />
                             </div>
-                            <v-pagination class="ml-2" density="comfortable" rounded="circle" active-color="primary"
-                                total-visible="7" v-model="pagination.page" :length="pages" />
+                            <v-pagination class="ml-2" density="comfortable" rounded="circle" :active-color="color"
+                                total-visible="7" :first-icon="firstIcon" :last-icon="lastIcon" :next-icon="nextIcon" :prev-icon="prevIcon"
+                                v-model="pagination.page" :length="pages" />
                             <v-spacer />
                             <span class="pr-2">{{ pageDetail }}</span>
                             <v-btn v-if="!hideRefereshButton" variant="text" :icon="refreshIcon" size="small"
@@ -625,7 +661,7 @@ function print() {
     </v-card>
 </template>
 
-<style scoped>
+<style>
 .dt-header-border {
     border-right: solid 1px rgba(0, 0, 0, 0.12);
 }
