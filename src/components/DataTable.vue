@@ -84,36 +84,37 @@ const props = defineProps({
     },
     title: String,
     itemValue: String,
+    headerTextSize: String,
     fileName: String,
     sortByColumn: String,
     modelValue: {
-      type: Array,
-      default: [],
+        type: Array,
+        default: [],
     },
     selectedRow: {
-      type: Object,
-      default: {}
+        type: Object,
+        default: {}
     },
     rowProps: {
-      type: [Object,Function],
+        type: [Object, Function],
     },
     items: {
         type: Array,
         default: [],
     },
     headers: {
-      required: true,
-      type: Array,
-      default: [],
+        required: true,
+        type: Array,
+        default: [],
     },
     itemsPerPageOptions: {
         type: Array,
         default: [
-        { value: 10, title: '10' },
-        { value: 25, title: '25' },
-        { value: 50, title: '50' },
-        { value: 100, title: '100' },
-        { value: -1, title: 'All' },
+            { value: 10, title: '10' },
+            { value: 25, title: '25' },
+            { value: 50, title: '50' },
+            { value: 100, title: '100' },
+            { value: -1, title: 'All' },
         ],
     },
     density: {
@@ -265,6 +266,9 @@ const filteredItems = computed(() => {
     return list;
 });
 
+const localHeaderTextSize = computed(() => {
+    if (props.headerTextSize?.length > 0) return { fontSize: props.headerTextSize };
+});
 
 // methods
 function getHeaders(columns) {
@@ -479,11 +483,14 @@ function print() {
                     </Draggable>
                 </v-list>
             </v-menu>
-            <v-toolbar-title>{{ title }}</v-toolbar-title>
+            <v-toolbar-title>
+                <slot name="title">{{ title }}</slot>
+            </v-toolbar-title>
             <slot name="pre-header-commands" />
             <v-btn v-if="showPrint" @click="print" :prepend-icon="printIcon">PRINT</v-btn>
             <slot name="post-header-commands" />
         </v-toolbar>
+        <slot name="header-expand-section" />
         <resizable-splitter :splitter-position="100 - (rightPaneWidth > 100 ? 80 : rightPaneWidth)"
             :show-splitter="showRightPane" :is-fixed="rightPaneFixed">
             <template v-slot:left-pane>
@@ -493,20 +500,21 @@ function print() {
                     :return-object="returnObject" :item-value="itemValue" :items-per-page="pagination.itemsPerPage"
                     :row-props="rowProps" v-model:page="pagination.page" v-model="dtModel" @click:row="rowClick">
                     <template v-slot:top="props">
-                        <slot v-bind="props" name="top" />
+                        <slot v-bind="props" name="top"/>
                     </template>
                     <template v-slot:headers="props">
                         <slot v-bind="props" name="headers">
-                            <tr v-for="(header, hIndex) in props.headers">
-                                <template :key="hIndex">
-                                    <slot v-for="(column, index) in header" v-bind="header" :name="`header.${column.key}`">
-                                        <template :key="index">
+                            <template v-for="(header, hIndex) in props.headers" :key="hIndex">
+                                <tr>
+                                    <template v-for="column in header" :key="column.key">
+                                        <slot v-bind="header" :name="`header.${column.key}`">
                                             <th class="bg-grey-lighten-4 dt-header-border" :style="[headerStyle(column)]"
                                                 :rowspan="column.rowspan" :colspan="column.colspan"
                                                 v-if="column.key !== 'data-table-select'">
                                                 <span v-if="checkIsSortable(column)" class="mr-2 cursor-pointer"
-                                                    @click="() => props.toggleSort(column)">{{ column.title }}</span>
-                                                <span v-else>{{ column.title }}</span>
+                                                    :style="localHeaderTextSize" @click="() => props.toggleSort(column)">{{
+                                                        column.title }}</span>
+                                                <span v-else :style="localHeaderTextSize">{{ column.title }}</span>
                                                 <template v-if="props.isSorted(column)">
                                                     <v-icon size="x-small" :icon="props.getSortIcon(column)"
                                                         aria-hidden="false" />
@@ -525,10 +533,10 @@ function print() {
                                                 <v-icon v-show="selectStrategy !== 'single'" :icon="getSelectAllIcon(props)"
                                                     @click="onSelectAll(props)" />
                                             </th>
-                                        </template>
-                                    </slot>
-                                </template>
-                            </tr>
+                                        </slot>
+                                    </template>
+                                </tr>
+                            </template>
                         </slot>
                         <tr v-if="!hideFilterRow">
                             <th class="bg-grey-lighten-4 dt-header-border"
@@ -536,7 +544,11 @@ function print() {
                                 <template v-if="column.filterable !== false">
                                     <v-select hide-details center-affix v-if="column.filterMode === FILTER_MODE.SELECTION"
                                         variant="plain" density="compact" color="primary" item-value="value"
-                                        item-title="title" :items="column.filterItems" v-model="column.filterValue" />
+                                        item-title="title" :items="column.filterItems" v-model="column.filterValue"
+                                        :list-props="{
+                                            lines: false,
+                                            density: 'compact'
+                                        }" />
                                     <v-text-field hide-details center-affix v-else variant="plain" density="compact"
                                         placeholder="Search" v-model="column.filterValue">
                                         <template v-slot:append>
