@@ -1,7 +1,7 @@
 {
   "name": "v-datatable-plus",
   "private": false,
-  "version": "0.0.11",
+  "version": "0.0.1",
   "type": "module",
   "keywords": [
     "datatable",
@@ -14,8 +14,7 @@
     "vuejs"
   ],
   "files": [
-    "dist",
-    "src/components/"
+    "dist"
   ],
   "main": "./dist/v-datatable-plus.umd.cjs",
   "module": "./dist/v-datatable-plus.js",
@@ -49,7 +48,7 @@
     "vuetify": "^3.5.1"
   },
   "devDependencies": {
-    "axios": "^1.6.7",
+    "vite-plugin-vuetify": "^2.0.1",
     "@vitejs/plugin-vue": "^4.5.2",
     "vite": "^5.0.8"
   }

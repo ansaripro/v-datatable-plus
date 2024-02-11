@@ -3,6 +3,23 @@ import { ref } from 'vue';
 import DataTable from './components/DataTable.vue';
 import { VChip } from 'vuetify/components';
 import { FILTER_TYPE, FILTER_MODE } from './types/index';
+// import {
+//     VDataTable,
+//     VToolbar,
+//     VToolbarTitle,
+//     VSelect,
+//     VList,
+//     VListItem,
+//     VListItemAction,
+//     VMenu,
+//     VBtn,
+//     VCard,
+//     VIcon,
+//     VCheckboxBtn,
+//     VPagination,
+//     VSpacer,
+//     VTextField,
+// } from 'vuetify/components';
 
 const selected = ref([]);
 const selectedRow = ref([]);

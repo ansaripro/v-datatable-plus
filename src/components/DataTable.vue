@@ -2,23 +2,6 @@
 import { ref, reactive, computed } from 'vue';
 import { FILTER_TYPE, FILTER_MODE } from '../types/index';
 import Draggable from 'vuedraggable';
-import {
-    VDataTable,
-    VToolbar,
-    VToolbarTitle,
-    VSelect,
-    VList,
-    VListItem,
-    VListItemAction,
-    VMenu,
-    VBtn,
-    VCard,
-    VIcon,
-    VCheckboxBtn,
-    VPagination,
-    VSpacer,
-    VTextField,
-} from 'vuetify/components';
 import ResizableSplitter from './ResizableSplitter.vue';
 
 const props = defineProps({
