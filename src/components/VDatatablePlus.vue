@@ -2,7 +2,7 @@
 import { ref, reactive, computed } from 'vue';
 import { FILTER_TYPE, FILTER_MODE } from '../types/index';
 import Draggable from 'vuedraggable';
-import ResizableSplitter from './ResizableSplitter.vue';
+import ResizeableSplitter from './ResizeableSplitter.vue';
 
 const props = defineProps({
     hideColumnMenu: {
@@ -358,20 +358,24 @@ function headerStyle(column) {
 }
 function rowClick($event, param) {
     emit('row', { $event, param });
-    if (props.highlightRow) lastSelectedRowNode.value?.classList.remove('dt-row-highlight');
-    // Click same row again
-    if (lastSelectedRowNode.value === $event.currentTarget) {
-        if (param.isSelected(param.internalItem)) param.toggleSelect(param.internalItem);
-        lastSelectedRowNode.value = null;
-        localSelectedRow.value = null;
-        return;
+    if (props.highlightRow) {
+        lastSelectedRowNode.value?.classList.remove('dt-row-highlight');
+        // Click same row again
+        if (lastSelectedRowNode.value === $event.currentTarget) {
+            if (param.isSelected(param.internalItem)) param.toggleSelect(param.internalItem);
+            lastSelectedRowNode.value = null;
+            localSelectedRow.value = null;
+            return;
+        }        
+        lastSelectedRowNode.value = $event.currentTarget;
+        lastSelectedRowNode.value?.classList.add('dt-row-highlight');
+        if (!param.isSelected(param.internalItem)) param.toggleSelect(param.internalItem);
+    } else {
+        param.toggleSelect(param.internalItem);
     }
-    lastSelectedRowNode.value = $event.currentTarget;
 
-    if (!param.isSelected(param.internalItem)) param.toggleSelect(param.internalItem);
     if (props.returnObject) localSelectedRow.value = param.item;
     if (props.itemValue?.length > 0) localSelectedRow.value = param.item?.[props.itemValue] ?? null;
-    if (props.highlightRow) lastSelectedRowNode.value?.classList.add('dt-row-highlight');
 }
 function matchFilter(type, value, searchVal) {
     let flag = true;
@@ -509,7 +513,7 @@ function print() {
             <slot name="post-header-commands" />
         </v-toolbar>
         <slot name="header-expand-section" />
-        <resizable-splitter :splitter-position="100 - (rightPaneWidth > 100 ? 80 : rightPaneWidth)"
+        <resizeable-splitter :splitter-position="100 - (rightPaneWidth > 100 ? 80 : rightPaneWidth)"
             :show-splitter="showRightPane" :is-fixed="rightPaneFixed">
             <template v-slot:left-pane>
                 <v-data-table fixed-header hover ref="customDataTable" class="dt-header-border" :height="tableHeight"
@@ -639,7 +643,7 @@ function print() {
             <template v-slot:right-pane>
                 <slot name="right-area" />
             </template>
-        </resizable-splitter>
+        </resizeable-splitter>
         <slot name="bottom-area" />
     </v-card>
 </template>

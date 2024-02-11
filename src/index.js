@@ -1,15 +1,15 @@
 
 import { FILTER_TYPE, FILTER_MODE }  from './types/index';
-import { default as VDatatablePlus }  from "./components/DataTable.vue";
-import { default as ResizableSplitter } from "./components/ResizableSplitter.vue";
+import VDatatablePlus  from "./components/VDatatablePlus.vue";
+import ResizeableSplitter from "./components/ResizeableSplitter.vue";
 
 const VDatatablePlusPlugin = {
   install: (app) => {
     app.component('VDatatablePlus', VDatatablePlus);
-    app.component('ResizableSplitter', ResizableSplitter);
+    app.component('ResizeableSplitter', ResizeableSplitter);
   }
 };
 
 export default VDatatablePlus;
 
-export { VDatatablePlusPlugin, ResizableSplitter, FILTER_TYPE, FILTER_MODE };
+export { VDatatablePlusPlugin, ResizeableSplitter, FILTER_TYPE, FILTER_MODE };
