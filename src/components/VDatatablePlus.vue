@@ -86,8 +86,8 @@ const props = defineProps({
         default: [],
     },
     selectedRow: {
-        type: Object,
-        default: {}
+        type: [Object, String, Number, Boolean],
+        default: null
     },
     rowProps: {
         type: [Object, Function],
