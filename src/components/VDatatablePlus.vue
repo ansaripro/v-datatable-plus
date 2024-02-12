@@ -37,6 +37,10 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
+    selectOnRow: {
+      type: Boolean,
+      default: false,
+    },
     returnObject: {
         type: Boolean,
         default: false,
@@ -76,6 +80,7 @@ const props = defineProps({
     headerIconSize: String,
     fileName: String,
     sortByColumn: String,
+    search: String,
     modelValue: {
         type: Array,
         default: [],
@@ -362,15 +367,15 @@ function rowClick($event, param) {
         lastSelectedRowNode.value?.classList.remove('dt-row-highlight');
         // Click same row again
         if (lastSelectedRowNode.value === $event.currentTarget) {
-            if (param.isSelected(param.internalItem)) param.toggleSelect(param.internalItem);
+            if (props.selectOnRow && param.isSelected(param.internalItem)) param.toggleSelect(param.internalItem);
             lastSelectedRowNode.value = null;
             localSelectedRow.value = null;
             return;
         }        
         lastSelectedRowNode.value = $event.currentTarget;
         lastSelectedRowNode.value?.classList.add('dt-row-highlight');
-        if (!param.isSelected(param.internalItem)) param.toggleSelect(param.internalItem);
-    } else {
+        if (props.selectOnRow && !param.isSelected(param.internalItem)) param.toggleSelect(param.internalItem);
+    } else if (props.selectOnRow) {
         param.toggleSelect(param.internalItem);
     }
 
@@ -520,7 +525,8 @@ function print() {
                     :density="density" :headers="tableHeaders" :items="filteredItems" :group-by="groupByColumn"
                     :show-expand="showExpand" :show-select="showSelect" :select-strategy="selectStrategy"
                     :return-object="returnObject" :item-value="itemValue" :items-per-page="pagination.itemsPerPage"
-                    :row-props="rowProps" :sort-asc-icon="sortAscIcon" :sort-desc-icon="sortDescIcon" :loading="loading" :color="color"
+                    :row-props="rowProps" :sort-asc-icon="sortAscIcon" :sort-desc-icon="sortDescIcon"
+                    :loading="loading" :color="color" :search="search"
                     v-model:page="pagination.page" v-model="dtModel" @click:row="rowClick">
                     <template v-slot:top="props">
                         <slot v-bind="props" name="top"/>
