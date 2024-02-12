@@ -1,7 +1,7 @@
 {
   "name": "v-datatable-plus",
   "private": false,
-  "version": "0.0.14",
+  "version": "0.0.15",
   "description": "This is a derived component which enahaced features of Vuetify VDataTable. It's also expose a ResizeableSplitter component which is useful for split horizontal contents with or without user interaction.",
   "type": "module",
   "keywords": [
