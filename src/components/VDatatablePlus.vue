@@ -25,7 +25,7 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
-    hideRefereshButton: {
+    hideRefreshButton: {
         type: Boolean,
         default: false,
     },
@@ -640,7 +640,7 @@ function print() {
                                 v-model="pagination.page" :length="pages" />
                             <v-spacer />
                             <span class="pr-2">{{ pageDetail }}</span>
-                            <v-btn v-if="!hideRefereshButton" variant="text" :icon="refreshIcon" size="small"
+                            <v-btn v-if="!hideRefreshButton" variant="text" :icon="refreshIcon" size="small"
                                 @click="$emit('refreshClick')" />
                         </v-toolbar>
                     </template>
