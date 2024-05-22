@@ -13,10 +13,6 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
-    showPrint: {
-        type: Boolean,
-        default: false,
-    },
     showRightPane: {
         type: Boolean,
         default: false,
@@ -67,7 +63,7 @@ const props = defineProps({
     },
     itemsPerPage: {
         type: Number,
-        default: 10,
+        default: 50,
     },
     tableHeight: {
         type: [String, Number],
@@ -80,9 +76,9 @@ const props = defineProps({
     title: String,
     color: String,
     itemValue: String,
+    itemsLength: Number,
     headerTextSize: String,
     headerIconSize: String,
-    fileName: String,
     sortByColumn: String,
     search: String,
     modelValue: {
@@ -108,11 +104,11 @@ const props = defineProps({
     itemsPerPageOptions: {
         type: Array,
         default: [
-            { value: 10, title: '10' },
-            { value: 25, title: '25' },
             { value: 50, title: '50' },
             { value: 100, title: '100' },
-            { value: -1, title: 'All' },
+            { value: 200, title: '200' },
+            { value: 300, title: '300' },
+            { value: 500, title: '500' },
         ],
     },
     density: {
@@ -123,13 +119,13 @@ const props = defineProps({
         type: String,
         default: 'page',
     },
-    printIcon: {
-        type: String,
-        default: 'mdi-printer',
-    },
     dragMenuIcon: {
         type: String,
         default: '$menu',
+    },
+    removeSearchIcon: {
+        type: String,
+        default: 'mdi-magnify-minus',
     },
     dragItemIcon: {
         type: String,
@@ -185,6 +181,12 @@ const emit = defineEmits([
     'update:modelValue',
     'update:headers',
     'update:selectedRow',
+    'update:expanded',
+    'update:groupBy',
+    'update:itemsPerPage',
+    'update:options',
+    'update:page',
+    'update:sortBy',
     'columnMenuOpened',
     'columnMenuDragChange',
     'columnMenuChecked',
@@ -192,16 +194,13 @@ const emit = defineEmits([
     'row'
 ]);
 
-// Template refs
-const customDataTable = ref(null);
-
 // Data properties
+const filterSearch = ref('');
 const groupByColumn = ref([]);
 const lastSelectedRowNode = ref(null);
 const pagination = reactive({
     page: 1,
     itemsPerPage: props.itemsPerPage,
-    totalItems: 0,
 });
 const filterTypes = reactive([
     { title: 'Contains', value: FILTER_TYPE.CONTAINS },
@@ -219,6 +218,14 @@ const dtModel = computed({
     },
     set(newValue) {
         emit('update:modelValue', newValue);
+    }
+});
+const dtSearchModel = computed({
+    get() {
+        return props.search || filterSearch.value;
+    },
+    set(newValue) {
+        filterSearch.value = newValue;
     }
 });
 const localSelectedRow = computed({
@@ -242,50 +249,18 @@ const tableHeaders = computed(() => {
 });
 const pages = computed(() => {
     let pages = 1;
-    if (pagination.itemsPerPage == null || pagination.totalItems == null) return pages;
-    pages = Math.ceil(pagination.totalItems / pagination.itemsPerPage);
+    if (pagination.itemsPerPage == null || props.itemsLength <= 0) return pages;
+    pages = Math.ceil(props.itemsLength / pagination.itemsPerPage);
     return pages > 0 ? pages : 1;
 });
 const pageDetail = computed(() => {
-    if (pagination.totalItems <= 0) return `${pagination.totalItems} items`;
-    if (pagination.itemsPerPage <= 0 || pagination.itemsPerPage > pagination.totalItems) return `1 - ${pagination.totalItems} items`;
+    if (props.itemsLength <= 0) return `${props.itemsLength} items`;
+    if (pagination.itemsPerPage <= 0 || pagination.itemsPerPage > props.itemsLength) return `1 - ${props.itemsLength} items`;
 
     const startPage = (pagination.page - 1) * pagination.itemsPerPage + 1;
     let endPage = pagination.page * pagination.itemsPerPage;
-    if (endPage > pagination.totalItems) endPage = pagination.totalItems;
-    return `${startPage} - ${endPage} of ${pagination.totalItems} items`;
-});
-const filteredItems = computed(() => {
-    let list = props.items;
-    if (
-        props.items?.length > 0
-        && customDataTable.value?.headers.length > 0
-    ) {
-        list = props.items.filter((o) => {
-            let flag = true;
-            customDataTable.value.headers.forEach((c) => {
-                if (flag) {
-                    if (c.filterMode === FILTER_MODE.SELECTION) {
-                        flag = c.filterValue === c.allFilterValue ? true : o[c.key] === c.filterValue;
-                    } else if (c.filterValue) {
-                        if (typeof c.formatCellValue === 'function') {
-                            const value = c.formatCellValue(o[c.key], c.formatParameter);
-                            flag = matchFilter(c.filterType, value, c.filterValue);
-                        } else {
-                            flag = matchFilter(
-                                c.filterType,
-                                o[c.key],
-                                c.filterValue,
-                            );
-                        }
-                    }
-                }
-            });
-            return flag;
-        });
-    }
-    pagination.totalItems = list ? list.length : 0;
-    return list;
+    if (endPage > props.itemsLength) endPage = props.itemsLength;
+    return `${startPage} - ${endPage} of ${props.itemsLength} items`;
 });
 
 const localHeaderTextSize = computed(() => {
@@ -347,7 +322,7 @@ function getGroupSortIcon(key) {
 function checkIsGroupBy(key) {
     return groupByColumn.value?.findIndex((g) => g.key === key) !== -1;
 }
-function gropHeaderDisplayText(gr, columns) {
+function groupHeaderDisplayText(gr, columns) {
     const column = columns.find((x) => x.key === gr.key);
     if (column) return `${column.title} : ${(typeof column.formatCellValue === 'function') ? column.formatCellValue(gr.value, column.formatParameter) : gr.value} (${gr.items.length})`;
     return `${gr.value} (${gr.items.length})`;
@@ -364,6 +339,21 @@ function headerStyle(column) {
         }
     }
     return {};
+}
+function onFilterTypeClick(column, filter) {
+    column.filterType = filter.value;
+    if (column.filterValue?.length > 0) {
+        dtSearchModel.value = `!${dtSearchModel.value}`;
+    }
+}
+function updateSearch(value) {
+    dtSearchModel.value = value;
+}
+function resetFilter() {
+    tableHeaders.value.forEach(c => {
+        c.filterValue = c.filterMode === FILTER_MODE.SELECTION ? c.allFilterValue : null;
+    });
+    dtSearchModel.value = '';
 }
 function rowClick($event, param) {
     emit('row', { $event, param });
@@ -429,60 +419,23 @@ function matchFilter(type, value, searchVal) {
     }
     return flag;
 }
-function print() {
-    if (
-        !tableHeaders.value
-        || tableHeaders.value.length === 0
-        || !props.items
-        || props.items.length === 0
-    ) return;
-    const columns = tableHeaders.value.filter((c) => c.isExclude !== true);
-    if (!columns || columns.length === 0) return;
-    let colTags = '';
-    let thTags = '';
-    columns.forEach((c) => {
-        colTags += '<col>';
-        thTags += `<th scope="col" role="columnheader" rowspan="1" class="header"><a class="link" href="#">${c.title ? c.title : c.key
-            }</a></th>`;
-    });
-    let tbody = '';
-    props.items.forEach((r) => {
-        tbody += '<tr role="row">';
-        columns.forEach((c) => {
-            tbody += '<td role="gridcell">';
-            if (typeof c.formatCellValue === 'function') tbody += c.formatCellValue(r[c.key], c.formatParameter);
-            else {
-                tbody += `${!r[c.key] || r[c.key] === 'null' ? '' : r[c.key]
-                    }`;
-            }
-            tbody += '</td>';
-        });
-        tbody += '</tr>';
-    });
-    const htmlString = `
-      <!DOCTYPE html><html><head><meta charset="utf-8"/><title>Print</title>
-      <style>html { font: 11pt sans-serif; }.grid { border-top-width: 1px; text-align:left; }.grid, .grid-content { height: auto !important; }
-      .grid-content { overflow: visible !important; }div.grid table { table-layout: auto; width: 100% !important; border-spacing:0;border-collapse:collapse;}
-      td { border-width: 1px 0; border-style:solid; border-color:#b9b9b9}.grid .grid-header th{border-width:0 0 2px;border-style:solid;}
-      .grid .grid-header th a{text-decoration:none;color:#000;}.grouping-header, .grid-toolbar, .grid-pager > .link,.command-cell{ display: none; }</style>
-      </head>
-      <body>
-      <div class="grid widget display-block editable"><div class="grid-content auto-scrollable">
-      <table role="grid"><colgroup>${colTags}</colgroup><thead role="rowgroup" class="grid-header"><tr role="row">${thTags}</tr></thead>
-      <tbody role="rowgroup">${tbody}</tbody>
-      </table>
-      </div></div>
-      </body>
-      </html>`;
-    const objWin = window.open(
-        '',
-        '',
-        'width= 800, height = 500, resizable = 1, scrollbars = 1',
-    );
-    objWin?.document.write(htmlString);
-    objWin?.document.close();
-    objWin?.focus();
-    objWin?.print();
+function updateExpanded(val) {
+    emit('update:expanded', val);
+}
+function updateGroupby(val) {
+    emit('update:groupBy', val);
+}
+function updateItemsPerPage(val) {
+    emit('update:itemsPerPage', val);
+}
+function updateOptions(val) {
+    emit('update:options', val);
+}
+function updatePage(val) {
+    emit('update:page', val);
+}
+function updateSortBy(val) {
+    emit('update:sortBy', val);
 }
 </script>
 
@@ -518,20 +471,40 @@ function print() {
                 <slot name="title">{{ title }}</slot>
             </v-toolbar-title>
             <slot name="pre-header-commands" />
-            <v-btn v-if="showPrint" @click="print" :prepend-icon="printIcon">PRINT</v-btn>
+            <v-btn v-if="!hideFilterRow" @click="resetFilter" :prepend-icon="removeSearchIcon">REMOVE SEARCH</v-btn>
             <slot name="post-header-commands" />
         </v-toolbar>
         <slot name="header-expand-section" />
         <resizeable-splitter :splitter-position="100 - (rightPaneWidth > 100 ? 80 : rightPaneWidth)"
             :show-splitter="showRightPane" :is-fixed="rightPaneFixed">
             <template v-slot:left-pane>
-                <v-data-table fixed-header hover ref="customDataTable" class="dt-header-border" :height="tableHeight"
-                    :density="density" :headers="tableHeaders" :items="filteredItems" :group-by="groupByColumn"
-                    :show-expand="showExpand" :show-select="showSelect" :select-strategy="selectStrategy"
-                    :return-object="returnObject" :item-value="itemValue" :items-per-page="pagination.itemsPerPage"
-                    :row-props="rowProps" :sort-asc-icon="sortAscIcon" :sort-desc-icon="sortDescIcon"
-                    :loading="loading" :color="color" :search="search"
-                    v-model:page="pagination.page" v-model="dtModel" @click:row="rowClick">
+                <v-data-table-server fixed-header hover
+                    class="dt-header-border"
+                    :height="tableHeight"
+                    :density="density"
+                    :headers="tableHeaders"
+                    :items="items"
+                    :items-length="itemsLength"
+                    :group-by="groupByColumn"
+                    :show-expand="showExpand"
+                    :show-select="showSelect"
+                    :select-strategy="selectStrategy"
+                    :return-object="returnObject"
+                    :item-value="itemValue"
+                    :items-per-page="pagination.itemsPerPage"
+                    :row-props="rowProps"
+                    :sort-asc-icon="sortAscIcon"
+                    :sort-desc-icon="sortDescIcon"
+                    :loading="loading"
+                    :color="color"
+                    :search="dtSearchModel"
+                    v-model:page="pagination.page" v-model="dtModel" @click:row="rowClick"
+                    @update:expanded="updateExpanded"
+                    @update:groupBy="updateGroupby"
+                    @update:itemsPerPage="updateItemsPerPage"
+                    @update:options="updateOptions"
+                    @update:page="updatePage"
+                    @update:sortBy="updateSortBy">
                     <template v-slot:top="props">
                         <slot v-bind="props" name="top"/>
                     </template>
@@ -574,15 +547,26 @@ function print() {
                             <th class="bg-grey-lighten-4 dt-header-border"
                                 v-for="(column, index) in getHeaders(props.columns)" :key="index">
                                 <template v-if="column.filterable !== false">
-                                    <v-select hide-details center-affix v-if="column.filterMode === FILTER_MODE.SELECTION"
-                                        variant="plain" density="compact" :color="color" item-value="value"
-                                        item-title="title" :items="column.filterItems" v-model="column.filterValue"
+                                    <v-select hide-details center-affix
+                                        v-if="column.filterMode === FILTER_MODE.SELECTION"
+                                        variant="plain"
+                                        density="compact"
+                                        :color="color"
+                                        item-value="value"
+                                        item-title="title"
+                                        :items="column.filterItems"
                                         :list-props="{
                                             lines: false,
                                             density: 'compact'
-                                        }" />
-                                    <v-text-field hide-details center-affix v-else variant="plain" density="compact"
-                                        placeholder="Search" v-model="column.filterValue">
+                                        }"
+                                        v-model="column.filterValue"
+                                        @update:model-value="updateSearch(column.filterValue)"/>
+                                    <v-text-field hide-details center-affix v-else
+                                        variant="plain"
+                                        density="compact"
+                                        placeholder="Search"
+                                        v-model="column.filterValue"
+                                        @update:model-value="updateSearch(column.filterValue)">
                                         <template v-slot:append>
                                             <v-menu>
                                                 <template v-slot:activator="{ props }">
@@ -591,8 +575,9 @@ function print() {
                                                 </template>
                                                 <v-list density="compact" :lines="false" :color="color">
                                                     <v-list-item v-for="filter in filterTypes" :key="filter.value"
-                                                        :title="filter.title" :active="column.filterType === filter.value"
-                                                        @click="column.filterType = filter.value" />
+                                                        :title="filter.title"
+                                                        :active="column.filterType === filter.value"
+                                                        @click="onFilterTypeClick(column, filter)"/>
                                                 </v-list>
                                             </v-menu>
                                         </template>
@@ -608,9 +593,8 @@ function print() {
                                     <v-icon :class="`ml-${props.item.depth * 3}`" size="small"
                                         @click="props.toggleGroup(props.item)"
                                         :icon="props.isGroupOpen(props.item) ? '$expand' : '$next'" />
-                                    <span>{{ gropHeaderDisplayText(props.item, props.columns) }}</span>
-                                    <v-icon size="small" class="ml-4" @click="onRemoveGroupBy(props.item.key)"
-                                        icon="$delete" />
+                                    <span>{{ groupHeaderDisplayText(props.item, props.columns) }}</span>
+                                    <v-icon size="small" class="ml-4" @click="onRemoveGroupBy(props.item.key)" icon="$delete" />
                                 </td>
                             </tr>
                         </slot>
@@ -635,20 +619,33 @@ function print() {
                         <v-toolbar v-if="!hideFooter" density="comfortable">
                             <span class="text-caption mx-1">Items per page</span>
                             <div style="width: 100px;">
-                                <v-select hide-details density="compact" variant="outlined"
-                                    v-model="pagination.itemsPerPage" item-title="title" item-value="value"
-                                    :items="itemsPerPageOptions" @update:model-value="pagination.page = 1" />
+                                <v-select hide-details
+                                    density="compact"
+                                    variant="outlined"
+                                    item-title="title"
+                                    item-value="value"
+                                    v-model="pagination.itemsPerPage"
+                                    :items="itemsPerPageOptions"
+                                    @update:model-value="pagination.page = 1" />
                             </div>
-                            <v-pagination class="ml-2" density="comfortable" rounded="circle" :active-color="color"
-                                total-visible="7" :first-icon="firstIcon" :last-icon="lastIcon" :next-icon="nextIcon" :prev-icon="prevIcon"
-                                v-model="pagination.page" :length="pages" />
-                            <v-spacer />
+                            <v-pagination
+                                class="ml-2"
+                                density="comfortable"
+                                rounded="circle"
+                                total-visible="7"
+                                :active-color="color"
+                                :first-icon="firstIcon"
+                                :last-icon="lastIcon"
+                                :next-icon="nextIcon"
+                                :prev-icon="prevIcon"
+                                :length="pages"
+                                v-model="pagination.page"/>
+                            <v-spacer/>
                             <span class="pr-2">{{ pageDetail }}</span>
-                            <v-btn v-if="!hideRefreshButton" variant="text" :icon="refreshIcon" size="small"
-                                @click="$emit('refreshClick')" />
+                            <v-btn v-if="!hideRefreshButton" variant="text" :icon="refreshIcon" size="small" @click="$emit('refreshClick')" />
                         </v-toolbar>
                     </template>
-                </v-data-table>
+                </v-data-table-server>
             </template>
             <template v-slot:right-pane>
                 <slot name="right-area" />
