@@ -85,6 +85,8 @@ const props = defineProps({
     fileName: String,
     sortByColumn: String,
     search: String,
+    columnMenuZIndex: [String, Number],
+    filterMenuZIndex: [String, Number],
     modelValue: {
         type: Array,
         default: [],
@@ -489,7 +491,9 @@ function print() {
 <template>
     <v-card variant="outlined" :color="color">
         <v-toolbar v-if="!hideTitleBar" density="compact">
-            <v-menu v-if="!hideColumnMenu" :close-on-content-click="false"
+            <v-menu v-if="!hideColumnMenu"
+                :z-index="columnMenuZIndex"
+                :close-on-content-click="false"
                 @update:modelValue="$emit('columnMenuOpened', $event)">
                 <template v-slot:activator="{ props }">
                     <v-btn size="small" :color="color" :icon="dragMenuIcon" v-bind="props" />
@@ -584,7 +588,7 @@ function print() {
                                     <v-text-field hide-details center-affix v-else variant="plain" density="compact"
                                         placeholder="Search" v-model="column.filterValue">
                                         <template v-slot:append>
-                                            <v-menu>
+                                            <v-menu :z-index="filterMenuZIndex">
                                                 <template v-slot:activator="{ props }">
                                                     <v-btn :color="color" variant="text" size="x-small" :icon="filterIcon"
                                                         v-bind="props" />
