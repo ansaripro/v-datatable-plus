@@ -251,6 +251,8 @@ const FakeAPI = {
 :::
 
 ## Preview
+::: raw
 <ClientOnly>
   <ServerDataTable />
 </ClientOnly>
+:::

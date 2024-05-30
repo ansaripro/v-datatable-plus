@@ -142,9 +142,11 @@ const items = ref([
 :::
 
 ## Simple Preview
+::: raw
 <ClientOnly>
   <DataTableSimple />
 </ClientOnly>
+:::
 
 
 
@@ -359,6 +361,8 @@ onMounted(() => {
 :::
 
 ## All Features Preview
+::: raw
 <ClientOnly>
   <DataTableFull />
 </ClientOnly>
+:::

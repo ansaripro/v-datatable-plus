@@ -5,9 +5,7 @@ import { aliases, md } from 'vuetify/iconsets/md'
 import VDataTalePlusPlugin from 'v-datatable-plus'
 import "vuetify/styles";
 import 'v-datatable-plus/dist/style.css'
-import './custom.css'
 
-// import FullScreen from '../../components/FullScreen.vue';
 import DataTableSimple from '../../components/DataTableSimple.vue';
 import DataTableFull from '../../components/DataTableFull.vue';
 import ServerDataTable from '../../components/ServerDataTable.vue';

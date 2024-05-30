@@ -1,8 +1,13 @@
 import { defineConfig } from 'vitepress';
 
 export default defineConfig({
-  base: process.env.NODE_ENV === 'production' ? '/v-datatable-plus/' : '',
+  base: '/v-datatable-plus/',
   title: 'Vuetify DataTable Plus',
+  vite: {
+    ssr: {
+      noExternal: ['vuetify'],
+    },
+  },
   description: 'Documentation for Vuetify Datatable Plus',
   themeConfig: {
     nav: [

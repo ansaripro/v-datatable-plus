@@ -25,6 +25,8 @@ import ResizeableSplitter from '../components/ResizeableSplitter.vue'
 
 Hover on Vertical line and move it to left or right.
 
+::: raw
 <client-only>
     <resizeable-splitter/>
 </client-only>
+:::
