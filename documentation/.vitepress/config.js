@@ -1,6 +1,7 @@
 import { defineConfig } from 'vitepress';
 
 export default defineConfig({
+  base: '/v-datatable-plus/',
   title: 'Vuetify DataTable Plus',
   description: 'Documentation for Vuetify Datatable Plus',
   themeConfig: {
