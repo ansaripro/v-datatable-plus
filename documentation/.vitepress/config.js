@@ -10,6 +10,9 @@ export default defineConfig({
   },
   description: 'Documentation for Vuetify Datatable Plus',
   themeConfig: {
+    search: {
+      provider: 'local'
+    },
     nav: [
       { text: 'Home', link: '/' },
       { text: 'Components', link: '/componentdocs/vdatatableplus' },

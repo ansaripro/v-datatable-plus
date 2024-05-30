@@ -4,9 +4,9 @@ import { ref } from 'vue';
 // Props
 const propsSearch = ref(null);
 const propsHeaders = ref([
-    { title: 'Name', key: 'name' },
+    { title: 'Name', key: 'name', width: '30%' },
     { title: 'Type', key: 'type' },
-    { title: 'Default', key: 'default' },
+    { title: 'Default', key: 'default', width: '20%' },
 ]);
 const propsItems = ref([
     {
@@ -271,7 +271,11 @@ const slotsItems = ref([
 All base [VDataTable](https://vuetifyjs.com/en/api/v-data-table) Props,Events, and Slots should works with this component.<br/>
 Note: height prop replace with table-height prop.
 
+## Component
+[VDatatablePlus](/componentdocs/vdatatableplus)
+
 ## Props
+::: raw
 <client-only>
     <v-data-table hide-default-footer
         :items-per-page="-1"
@@ -306,8 +310,10 @@ Note: height prop replace with table-height prop.
         </template>
     </v-data-table>
 </client-only>
+:::
 
 ## Events
+::: raw
 <client-only>
     <v-data-table hide-default-footer
         :items-per-page="-1"
@@ -337,8 +343,10 @@ Note: height prop replace with table-height prop.
         </template>
     </v-data-table>
 </client-only>
+:::
 
 ## Slots
+::: raw
 <client-only>
     <v-data-table hide-default-footer
         :items-per-page="-1"
@@ -367,3 +375,4 @@ Note: height prop replace with table-height prop.
         </template>
     </v-data-table>
 </client-only>
+:::

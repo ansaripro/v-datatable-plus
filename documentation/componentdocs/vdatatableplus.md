@@ -5,6 +5,9 @@ import DataTableFull from '../components/DataTableFull.vue'
 
 # VDatatablePlus
 
+## API
+[VDatatablePlus](/api/vdatatableplus)
+
 ## Simple Usage
 
 ::: code-group

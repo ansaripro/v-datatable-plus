@@ -101,17 +101,64 @@ const items = ref([
 ```
 
 ## FilterType
-|Types              |String Value       |
-|:------------------|:------------------|
-|IsEqualTo          |'eq'               |
-|IsNotEqualTo       |'neq'              |
-|StartWith          |'starts'           |
-|Contains           |'contains'         |
-|NotContains        |'notcontains'      |
-|EndWith            |'ends'             |
+::: raw
+<v-table>
+    <thead>
+        <tr>
+            <th>Types</th>
+            <th>String Value</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>IsEqualTo</td>
+            <td>'eq'</td>
+        </tr>
+        <tr>
+            <td>IsNotEqualTo</td>
+            <td>'neq'</td>
+        </tr>
+        <tr>
+            <td>StartWith</td>
+            <td>'starts'</td>
+        </tr>
+        <tr>
+            <td>Contains</td>
+            <td>'contains'</td>
+        </tr>
+        <tr>
+            <td>NotContains</td>
+            <td>'notcontains'</td>
+        </tr>
+        <tr>
+            <td>EndWith</td>
+            <td>'ends'</td>
+        </tr>
+    </tbody>
+</v-table>
+:::
 
 ## FilterMode
-|Modes              |String Value       |Detail     |
-|:------------------|:------------------|:----------|
-|Selection          |'selection'        |Set when you need dropdown filter and set filter properties against headers props |
-|Types              |'types'            |           |
+::: raw
+<v-table>
+    <thead>
+        <tr>
+            <th>Modes</th>
+            <th>String Value</th>
+            <th>Detail</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Selection</td>
+            <td>'selection'</td>
+            <td>Set when you need dropdown filter and set filter properties against headers props</td>
+        </tr>
+        <tr>
+            <td>Types</td>
+            <td>'types'</td>
+            <td></td>
+        </tr>
+    </tbody>
+</v-table>
+:::

@@ -48,7 +48,11 @@ const slotsItems = ref([
 
 # ResizeableSplitter API
 
+## Component
+[ResizeableSplitter](/componentdocs/resizeablesplitter)
+
 ## Props
+::: raw
 <client-only>
     <v-data-table hide-default-footer
         :items-per-page="-1"
@@ -83,8 +87,10 @@ const slotsItems = ref([
         </template>
     </v-data-table>
 </client-only>
+:::
 
 ## Slots
+::: raw
 <client-only>
     <v-data-table hide-default-footer
         :items-per-page="-1"
@@ -113,3 +119,4 @@ const slotsItems = ref([
         </template>
     </v-data-table>
 </client-only>
+:::

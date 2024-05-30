@@ -4,6 +4,9 @@ import ServerDataTable from '../components/ServerDataTable.vue'
 
 # VDatatableServerPlus
 
+## API
+[VDatatableServerPlus](/api/vdatatableserverplus)
+
 ## Usage
 
 ::: code-group

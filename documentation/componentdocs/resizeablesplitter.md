@@ -4,6 +4,9 @@ import ResizeableSplitter from '../components/ResizeableSplitter.vue'
 
 # ResizeableSplitter
 
+## API
+[ResizeableSplitter](/api/resizeablesplitter)
+
 ## Usage
 ```vue
 <template>
