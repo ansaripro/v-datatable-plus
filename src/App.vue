@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 import VDatatablePlus from './components/VDatatablePlus.vue';
 import { VChip } from 'vuetify/components';
-import { FILTER_TYPE, FILTER_MODE } from './types/index';
+import { FilterType, FilterMode } from './types/index';
 import data from './data';
 // import {
 //     VDataTable,
@@ -30,13 +30,13 @@ const headers = [
     title: 'Dessert (100g serving)',
     align: 'start',
     key: 'name',
-    filterType: FILTER_TYPE.CONTAINS,
+    filterType: FilterType.Contains,
   },
-  { isShow: true, title: 'Calories', align: 'end', key: 'calories', groupable: true, filterType: FILTER_TYPE.CONTAINS },
-  { isShow: true, title: 'Fat (g)', align: 'end', key: 'fat', filterType: FILTER_TYPE.CONTAINS },
-  { isShow: true, title: 'Carbs (g)', align: 'end', key: 'carbs', filterType: FILTER_TYPE.CONTAINS },
-  { isShow: true, title: 'Protein (g)', align: 'end', key: 'protein', filterType: FILTER_TYPE.CONTAINS },
-  { isShow: true, title: 'Iron (%)', align: 'end', key: 'iron', filterType: FILTER_TYPE.CONTAINS },
+  { isShow: true, title: 'Calories', align: 'end', key: 'calories', groupable: true, filterType: FilterType.Contains },
+  { isShow: true, title: 'Fat (g)', align: 'end', key: 'fat', filterType: FilterType.Contains },
+  { isShow: true, title: 'Carbs (g)', align: 'end', key: 'carbs', filterType: FilterType.Contains },
+  { isShow: true, title: 'Protein (g)', align: 'end', key: 'protein', filterType: FilterType.Contains },
+  { isShow: true, title: 'Iron (%)', align: 'end', key: 'iron', filterType: FilterType.Contains },
 ]
 const desserts = data;
 </script>

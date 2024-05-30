@@ -1,5 +1,6 @@
 
-import { FILTER_TYPE, FILTER_MODE }  from './types/index';
+import './style.css';
+import { FilterType, FilterMode }  from './types/index';
 import VDatatablePlus  from "./components/VDatatablePlus.vue";
 import VDatatableServerPlus  from "./components/VDatatableServerPlus.vue";
 import ResizeableSplitter from "./components/ResizeableSplitter.vue";
@@ -14,4 +15,4 @@ const VDatatablePlusPlugin = {
 
 export default VDatatablePlusPlugin;
 
-export { VDatatablePlus, VDatatableServerPlus, ResizeableSplitter, FILTER_TYPE, FILTER_MODE };
+export { VDatatablePlus, VDatatableServerPlus, ResizeableSplitter, FilterType, FilterMode };

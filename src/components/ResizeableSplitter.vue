@@ -68,33 +68,11 @@ function endDragging() {
 <template>
   <div class="rs-parent-box">
     <div class="rs-border" :style="leftPaneStyle">
-      <slot name="left-pane" />
+      <slot name="left-panel" />
     </div>
     <div class="rs-splitter-base" :style="splitterStyle" @mousedown="startDragging" />
     <div class="rs-border" :style="rightPaneStyle">
-      <slot name="right-pane" />
+      <slot name="right-panel" />
     </div>
   </div>
 </template>
-
-<style>
-.rs-parent-box {
-  display: flex;
-  position: relative;
-  height: 100%;
-}
-
-.rs-border {
-  border: 1px solid rgba(0,0,0,0.12);
-}
-
-.rs-splitter-base {
-  position: absolute;
-  top: 0;
-  height: 100%;
-  width: 4px;
-  background: rgba(0,0,0,0.12);
-  transform: translateX(-2px);
-  z-index: 1;
-}
-</style>

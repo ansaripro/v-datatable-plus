@@ -1,10 +1,11 @@
 <script setup>
-import { ref, reactive, computed } from 'vue';
-import { FILTER_TYPE, FILTER_MODE } from '../types/index';
+import { ref, reactive, computed, watch, useSlots } from 'vue';
+import { FilterType, FilterMode } from '../types/index';
 import Draggable from 'vuedraggable';
 import ResizeableSplitter from './ResizeableSplitter.vue';
 
 const props = defineProps({
+    // custom
     hideTitleBar: {
         type: Boolean,
         default: false,
@@ -17,7 +18,7 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
-    showRightPane: {
+    showRightPanel: {
         type: Boolean,
         default: false,
     },
@@ -33,6 +34,54 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
+    selectOnRow: {
+      type: Boolean,
+      default: false,
+    },
+    highlightRow: {
+        type: Boolean,
+        default: false,
+    },
+    rightPanelFixed: {
+        type: Boolean,
+        default: true,
+    },
+    rightPanelWidth: {
+        type: Number,
+        default: 20,
+    },
+    dragMenuHeight: {
+        type: Number,
+        default: 250,
+    },
+    tableHeight: {
+        type: [String, Number],
+        default: '50vh',
+    },
+    selectedRow: {
+        type: [Object, String, Number, Boolean],
+        default: null
+    },
+    columnMenuZIndex: [String, Number],
+    filterMenuZIndex: [String, Number],
+    title: String,
+    rowHighlightClass: String,
+    headerTextSize: String,
+    headerIconSize: String,
+    // vuetify
+    itemValue: String,
+    color: String,
+    search: String,
+    customFilter: Function,
+    valueComparator: Function,
+    returnObject: {
+        type: Boolean,
+        default: false,
+    },
+    hideNoData: {
+        type: Boolean,
+        default: false,
+    },
     showExpand: {
         type: Boolean,
         default: false,
@@ -41,62 +90,83 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
-    selectOnRow: {
-      type: Boolean,
-      default: false,
-    },
-    returnObject: {
+    disableSort: {
         type: Boolean,
         default: false,
     },
-    highlightRow: {
+    expandOnClick: {
         type: Boolean,
         default: false,
     },
-    rightPaneFixed: {
+    mobile: {
+        type: Boolean,
+        default: false,
+    },
+    multiSort: {
+        type: Boolean,
+        default: false,
+    },
+    mustSort: {
+        type: Boolean,
+        default: false,
+    },
+    sticky: {
+        type: Boolean,
+        default: false,
+    },
+    hover: {
         type: Boolean,
         default: true,
     },
-    rightPaneWidth: {
-        type: Number,
-        default: 20,
+    expanded: {
+        type: Array,
+        default: [],
     },
-    dragMenuHeight: {
-        type: Number,
-        default: 250,
+    groupBy: {
+        type: Array,
+        default: [],
     },
-    itemsPerPage: {
-        type: Number,
-        default: 10,
-    },
-    tableHeight: {
-        type: [String, Number],
-        default: '50vh',
-    },
-    loading: {
-        type: [String, Boolean],
-        default: false,
-    },
-    title: String,
-    color: String,
-    itemValue: String,
-    headerTextSize: String,
-    headerIconSize: String,
-    fileName: String,
-    sortByColumn: String,
-    search: String,
-    columnMenuZIndex: [String, Number],
-    filterMenuZIndex: [String, Number],
     modelValue: {
         type: Array,
         default: [],
     },
-    selectedRow: {
+    theme: {
+        type:  String,
+        default: undefined,
+    },
+    filterKeys: {
+        type:  [String, Array],
+        default: undefined,
+    },
+    customKeyFilter: {
+        type:  [String, Number, Boolean, Object, Function],
+        default: undefined,
+    },
+    customKeySort: {
+        type:  [String, Number, Boolean, Object, Function],
+        default: undefined,
+    },
+    mobileBreakpoint: {
+        type:  [Number, String],
+        default: undefined,
+    },
+    itemSelectable: {
         type: [Object, String, Number, Boolean],
         default: null
     },
     rowProps: {
         type: [Object, Function],
+    },
+    cellProps: {
+        type: [Object, Function],
+    },
+    loading: {
+        type: [String, Boolean],
+        default: false,
+    },
+    sortBy: {
+        type: Array,
+        default: [],
     },
     items: {
         type: Array,
@@ -106,6 +176,14 @@ const props = defineProps({
         required: true,
         type: Array,
         default: [],
+    },
+    page: {
+        type: [String, Number],
+        default: 1,
+    },
+    itemsPerPage: {
+        type: [String, Number],
+        default: 10,
     },
     itemsPerPageOptions: {
         type: Array,
@@ -117,6 +195,18 @@ const props = defineProps({
             { value: -1, title: 'All' },
         ],
     },
+    noDataText: {
+        type: String,
+        default: '$vuetify.noDataText',
+    },
+    loadingText: {
+        type: String,
+        default: '$vuetify.dataIterator.loadingText',
+    },
+    filterMode: {
+        type: String,
+        default: 'intersection',
+    },
     density: {
         type: String,
         default: 'compact',
@@ -125,6 +215,31 @@ const props = defineProps({
         type: String,
         default: 'page',
     },
+    sortAscIcon: {
+        type: String,
+        default: '$sortAsc',
+    },
+    sortDescIcon: {
+        type: String,
+        default: '$sortDesc',
+    },
+    firstIcon: {
+        type: String,
+        default: '$first',
+    },
+    lastIcon: {
+        type: String,
+        default: '$last',
+    },
+    nextIcon: {
+        type: String,
+        default: '$next',
+    },
+    prevIcon: {
+        type: String,
+        default: '$prev',
+    },
+    // custom
     printIcon: {
         type: String,
         default: 'mdi-printer',
@@ -145,14 +260,6 @@ const props = defineProps({
         type: String,
         default: 'mdi-filter',
     },
-    sortAscIcon: {
-        type: String,
-        default: '$sortAsc',
-    },
-    sortDescIcon: {
-        type: String,
-        default: '$sortDesc',
-    },
     groupByIcon: {
         type: String,
         default: 'mdi-table-plus',
@@ -165,54 +272,47 @@ const props = defineProps({
         type: String,
         default: 'mdi-sort-descending',
     },
-    firstIcon: {
-        type: String,
-        default: '$first',
-    },
-    lastIcon: {
-        type: String,
-        default: '$last',
-    },
-    nextIcon: {
-        type: String,
-        default: '$next',
-    },
-    prevIcon: {
-        type: String,
-        default: '$prev',
-    },
 });
 
 const emit = defineEmits([
+    'update:currentItems',
+    'update:expanded',
+    'update:groupBy',
+    'update:itemsPerPage',
     'update:modelValue',
+    'update:options',
+    'update:page',
+    'update:sortBy',
     'update:headers',
     'update:selectedRow',
+    'click:refresh',
+    'click:row',
     'columnMenuOpened',
     'columnMenuDragChange',
-    'columnMenuChecked',
-    'refreshClick',
-    'row'
+    'columnMenuChecked'
 ]);
 
 // Template refs
 const customDataTable = ref(null);
 
 // Data properties
-const groupByColumn = ref([]);
 const lastSelectedRowNode = ref(null);
-const pagination = reactive({
-    page: 1,
-    itemsPerPage: props.itemsPerPage,
-    totalItems: 0,
-});
+const itemsLength = ref(0);
 const filterTypes = reactive([
-    { title: 'Contains', value: FILTER_TYPE.CONTAINS },
-    { title: 'Does not contain', value: FILTER_TYPE.NOT_CONTAINS },
-    { title: 'Is equal to', value: FILTER_TYPE.IS_EQUAL_TO },
-    { title: 'Is not equal to', value: FILTER_TYPE.IS_NOT_EQUAL_TO },
-    { title: 'Starts with', value: FILTER_TYPE.START_WITH },
-    { title: 'Ends with', value: FILTER_TYPE.END_WITH },
+    { title: 'Contains', value: FilterType.Contains },
+    { title: 'Does not contain', value: FilterType.NotContains },
+    { title: 'Is equal to', value: FilterType.IsEqualTo },
+    { title: 'Is not equal to', value: FilterType.IsNotEqualTo },
+    { title: 'Starts with', value: FilterType.StartWith },
+    { title: 'Ends with', value: FilterType.EndWith },
 ]);
+// Helper Properties
+const slots = useSlots();
+const currentPage = ref(1);
+const curentItemPerPage = ref(10);
+const currentSortBy = ref([]);
+const currentGroupBy = ref([]);
+
 
 // Computed
 const dtModel = computed({
@@ -221,6 +321,50 @@ const dtModel = computed({
     },
     set(newValue) {
         emit('update:modelValue', newValue);
+    }
+});
+const dtSortBy = computed({
+    get() {
+        return currentSortBy.value;
+    },
+    set(newValue) {
+        currentSortBy.value = newValue;
+        emit('update:sortBy', newValue);
+    }
+});
+const dtPage = computed({
+    get() {
+        return currentPage.value;
+    },
+    set(newValue) {
+        currentPage.value = newValue;
+        emit('update:page', newValue);
+    }
+});
+const dtItemsPerPage = computed({
+    get() {
+        return curentItemPerPage.value;
+    },
+    set(newValue) {
+        curentItemPerPage.value = newValue;
+        emit('update:itemsPerPage', newValue);
+    }
+});
+const dtGroupBy = computed({
+    get() {
+        return currentGroupBy.value;
+    },
+    set(newValue) {
+        currentGroupBy.value = newValue;
+        emit('update:groupBy', newValue);
+    }
+});
+const dtExpanded = computed({
+    get() {
+        return props.expanded;
+    },
+    set(newValue) {
+        emit('update:expanded', newValue);
     }
 });
 const localSelectedRow = computed({
@@ -244,18 +388,18 @@ const tableHeaders = computed(() => {
 });
 const pages = computed(() => {
     let pages = 1;
-    if (pagination.itemsPerPage == null || pagination.totalItems == null) return pages;
-    pages = Math.ceil(pagination.totalItems / pagination.itemsPerPage);
+    if (dtItemsPerPage.value == null || itemsLength.value <= 0) return pages;
+    pages = Math.ceil(itemsLength.value / dtItemsPerPage.value);
     return pages > 0 ? pages : 1;
 });
 const pageDetail = computed(() => {
-    if (pagination.totalItems <= 0) return `${pagination.totalItems} items`;
-    if (pagination.itemsPerPage <= 0 || pagination.itemsPerPage > pagination.totalItems) return `1 - ${pagination.totalItems} items`;
+    if (itemsLength.value <= 0) return `${itemsLength.value} items`;
+    if (dtItemsPerPage.value <= 0 || dtItemsPerPage.value > itemsLength.value) return `1 - ${itemsLength.value} items`;
 
-    const startPage = (pagination.page - 1) * pagination.itemsPerPage + 1;
-    let endPage = pagination.page * pagination.itemsPerPage;
-    if (endPage > pagination.totalItems) endPage = pagination.totalItems;
-    return `${startPage} - ${endPage} of ${pagination.totalItems} items`;
+    const startPage = (dtPage.value - 1) * dtItemsPerPage.value + 1;
+    let endPage = dtPage.value * dtItemsPerPage.value;
+    if (endPage > itemsLength.value) endPage = itemsLength.value;
+    return `${startPage} - ${endPage} of ${itemsLength.value} items`;
 });
 const filteredItems = computed(() => {
     let list = props.items;
@@ -267,26 +411,19 @@ const filteredItems = computed(() => {
             let flag = true;
             customDataTable.value.headers.forEach((c) => {
                 if (flag) {
-                    if (c.filterMode === FILTER_MODE.SELECTION) {
-                        flag = c.filterValue === c.allFilterValue ? true : o[c.key] === c.filterValue;
+                    const value = typeof c.value === 'function' ? c.value(o) : o[c.key];
+                    
+                    if (c.filterMode === FilterMode.Selection) {
+                        flag = c.filterValue === c.allFilterValue ? true : value === c.filterValue;
                     } else if (c.filterValue) {
-                        if (typeof c.formatCellValue === 'function') {
-                            const value = c.formatCellValue(o[c.key], c.formatParameter);
-                            flag = matchFilter(c.filterType, value, c.filterValue);
-                        } else {
-                            flag = matchFilter(
-                                c.filterType,
-                                o[c.key],
-                                c.filterValue,
-                            );
-                        }
+                        flag = matchFilter(c.filterType, value, c.filterValue);
                     }
                 }
             });
             return flag;
         });
     }
-    pagination.totalItems = list ? list.length : 0;
+    itemsLength.value = list ? list.length : 0;
     return list;
 });
 
@@ -299,6 +436,20 @@ const localHeaderIconSize = computed(() => {
     else return { fontSize: '12px' };
 });
 
+//Watches
+watch(() => props.page, (newValue) => {
+    currentPage.value = newValue;
+});
+watch(() => props.itemsPerPage, (newValue) => {
+    curentItemPerPage.value = newValue;
+});
+watch(() => props.sortBy, (newValue) => {
+    currentSortBy.value = newValue;
+}, { deep: true });
+watch(() => props.groupBy, (newValue) => {
+    currentGroupBy.value = newValue;
+}, { deep: true });
+
 // methods
 function getHeaders(columns) {
     if (columns && columns.length > 0) {
@@ -310,6 +461,15 @@ function getHeaders(columns) {
         });
     }
     return columns;
+}
+function getHeaderProps(props, column) {
+    let hProps = {...props, column: column};
+    delete hProps.headers;
+    delete hProps.columns;
+    return hProps;
+}
+function onChangeItemPerPage() {
+    dtPage.value = 1
 }
 function checkIsSortable(column) {
     return column.sortable && !(column.children && column.children.length > 0);
@@ -327,32 +487,46 @@ function onSelectAll(props) {
     else props.selectAll(true);
 }
 function onGroupBy(key) {
-    if (groupByColumn.value?.findIndex((g) => g.key === key) === -1) {
-        groupByColumn.value?.push({ key: key, order: 'asc' });
+    const groupByColumn = dtGroupBy.value || [];
+    if (groupByColumn.findIndex((g) => g.key === key) === -1) {
+        groupByColumn.push({ key: key, order: 'asc' });
+        dtGroupBy.value = groupByColumn;
     }
 }
 function onRemoveGroupBy(key) {
-    const indx = groupByColumn.value?.findIndex((g) => g.key === key);
+    const groupByColumn = dtGroupBy.value || [];
+    const indx = groupByColumn.findIndex((g) => g.key === key);
     if (indx !== -1) {
-        groupByColumn.value?.splice(indx, 1);
+        groupByColumn.splice(indx, 1);
+        dtGroupBy.value = groupByColumn;
     }
 }
 function sortByGroup(key) {
-    const obj = groupByColumn.value?.find((g) => g.key === key);
+    const groupByColumn = dtGroupBy.value;
+    const obj = groupByColumn?.find((g) => g.key === key);
     obj.order = obj.order === 'asc' ? 'desc' : 'asc';
+    dtGroupBy.value = groupByColumn;
 }
 function getGroupSortIcon(key) {
-    const obj = groupByColumn.value?.find((g) => g.key === key);
+    const obj = dtGroupBy.value?.find((g) => g.key === key);
     if (obj) return obj.order === 'asc' ? props.groupSortAscIcon : props.groupSortDescIcon;
     else return props.groupSortAscIcon;
 }
 function checkIsGroupBy(key) {
-    return groupByColumn.value?.findIndex((g) => g.key === key) !== -1;
+    return dtGroupBy.value?.findIndex((g) => g.key === key) !== -1;
 }
-function gropHeaderDisplayText(gr, columns) {
+function groupHeaderDisplayText(gr, columns) {
+    let text = '';
     const column = columns.find((x) => x.key === gr.key);
-    if (column) return `${column.title} : ${(typeof column.formatCellValue === 'function') ? column.formatCellValue(gr.value, column.formatParameter) : gr.value} (${gr.items.length})`;
-    return `${gr.value} (${gr.items.length})`;
+    if (column) {
+        const val = typeof column.value === 'function' ? column.value({[gr.key]: gr.value}) : gr.value;
+        text = `${column.title}: ${val}`;
+    }
+    text = `${text} (Count: ${gr.items.length})`;
+    return text;
+}
+function getGroupProps(props) {
+    return {...props, onRemoveGroupBy: onRemoveGroupBy};
 }
 function headerStyle(column) {
     if (column) {
@@ -367,19 +541,25 @@ function headerStyle(column) {
     }
     return {};
 }
+function updateCurrentItems(obj) {
+    emit('update:currentItems', obj);
+}
+function updateOptions(obj) {
+    emit('update:options', obj);
+}
 function rowClick($event, param) {
-    emit('row', { $event, param });
     if (props.highlightRow) {
-        lastSelectedRowNode.value?.classList.remove('dt-row-highlight');
+        if (props.rowHighlightClass) lastSelectedRowNode.value?.classList.remove(props.rowHighlightClass);
         // Click same row again
         if (lastSelectedRowNode.value === $event.currentTarget) {
             if (props.selectOnRow && param.isSelected(param.internalItem)) param.toggleSelect(param.internalItem);
             lastSelectedRowNode.value = null;
             localSelectedRow.value = null;
+            emit('click:row', { $event, param });
             return;
         }        
         lastSelectedRowNode.value = $event.currentTarget;
-        lastSelectedRowNode.value?.classList.add('dt-row-highlight');
+        if (props.rowHighlightClass) lastSelectedRowNode.value?.classList.add(props.rowHighlightClass);
         if (props.selectOnRow && !param.isSelected(param.internalItem)) param.toggleSelect(param.internalItem);
     } else if (props.selectOnRow) {
         param.toggleSelect(param.internalItem);
@@ -387,41 +567,42 @@ function rowClick($event, param) {
 
     if (props.returnObject) localSelectedRow.value = param.item;
     if (props.itemValue?.length > 0) localSelectedRow.value = param.item?.[props.itemValue] ?? null;
+    emit('click:row', { $event, param });
 }
 function matchFilter(type, value, searchVal) {
     let flag = true;
     if (!searchVal) return flag;
 
     switch (type) {
-        case FILTER_TYPE.IS_EQUAL_TO:
+        case FilterType.IsEqualTo:
             flag = value === searchVal
                 || (value
                     && String(value).toLowerCase() === String(searchVal).toLowerCase());
             break;
-        case FILTER_TYPE.IS_NOT_EQUAL_TO:
+        case FilterType.IsNotEqualTo:
             flag = value !== searchVal
                 || (value
                     && String(value).toLowerCase() !== String(searchVal).toLowerCase());
             break;
-        case FILTER_TYPE.START_WITH:
+        case FilterType.StartWith:
             flag = value
                 && String(value)
                     .toLowerCase()
                     .startsWith(String(searchVal).toLowerCase());
             break;
-        case FILTER_TYPE.END_WITH:
+        case FilterType.EndWith:
             flag = value
                 && String(value)
                     .toLowerCase()
                     .endsWith(String(searchVal).toLowerCase());
             break;
-        case FILTER_TYPE.NOT_CONTAINS:
+        case FilterType.NotContains:
             flag = value
                 && !String(value)
                     .toLowerCase()
                     .includes(String(searchVal).toLowerCase());
             break;
-        case FILTER_TYPE.CONTAINS:
+        case FilterType.Contains:
         default:
             flag = value
                 && String(value)
@@ -452,11 +633,8 @@ function print() {
         tbody += '<tr role="row">';
         columns.forEach((c) => {
             tbody += '<td role="gridcell">';
-            if (typeof c.formatCellValue === 'function') tbody += c.formatCellValue(r[c.key], c.formatParameter);
-            else {
-                tbody += `${!r[c.key] || r[c.key] === 'null' ? '' : r[c.key]
-                    }`;
-            }
+            const val = typeof c.value === 'function' ? c.value(r) : r[c.key];
+            tbody += val && val !== 'null' ? val : '';
             tbody += '</td>';
         });
         tbody += '</tr>';
@@ -489,28 +667,34 @@ function print() {
 </script>
 
 <template>
-    <v-card variant="outlined" :color="color">
-        <v-toolbar v-if="!hideTitleBar" density="compact">
+    <v-card variant="outlined" :color="color" :theme="theme">
+        <v-toolbar v-if="!hideTitleBar" density="compact" :theme="theme">
             <v-menu v-if="!hideColumnMenu"
                 :z-index="columnMenuZIndex"
+                :theme="theme"
                 :close-on-content-click="false"
                 @update:modelValue="$emit('columnMenuOpened', $event)">
-                <template v-slot:activator="{ props }">
+                <template #activator="{ props }">
                     <v-btn size="small" :color="color" :icon="dragMenuIcon" v-bind="props" />
                 </template>
-                <v-list density="compact" lines="one" :max-height="dragMenuHeight">
-                    <Draggable v-model="localHeaders" item-key="key" handle=".cursor-move"
+                <v-list density="compact" lines="one" :theme="theme" :max-height="dragMenuHeight">
+                    <Draggable
+                        item-key="key"
+                        handle=".cursor-move"
+                        v-model="localHeaders"
                         @change="$emit('columnMenuDragChange', $event)">
-                        <template v-slot:item="{ element }">
+                        <template #item="{ element }">
                             <v-list-item>
-                                <template v-slot:prepend>
+                                <template #prepend>
                                     <v-list-item-action start>
-                                        <v-checkbox-btn :color="color" v-model="element.isShow"
+                                        <v-checkbox-btn
+                                            :color="color"
+                                            v-model="element.isShow"
                                             @change="$emit('columnMenuChecked', { element, $event })" />
                                     </v-list-item-action>
                                 </template>
                                 {{ element.title }}
-                                <template v-slot:append>
+                                <template #append>
                                     <v-icon size="small" density="compact" class="cursor-move" :icon="dragItemIcon" />
                                 </template>
                             </v-list-item>
@@ -526,48 +710,147 @@ function print() {
             <slot name="post-header-commands" />
         </v-toolbar>
         <slot name="header-expand-section" />
-        <resizeable-splitter :splitter-position="100 - (rightPaneWidth > 100 ? 80 : rightPaneWidth)"
-            :show-splitter="showRightPane" :is-fixed="rightPaneFixed">
-            <template v-slot:left-pane>
-                <v-data-table fixed-header hover ref="customDataTable" class="dt-header-border" :height="tableHeight"
-                    :density="density" :headers="tableHeaders" :items="filteredItems" :group-by="groupByColumn"
-                    :show-expand="showExpand" :show-select="showSelect" :select-strategy="selectStrategy"
-                    :return-object="returnObject" :item-value="itemValue" :items-per-page="pagination.itemsPerPage"
-                    :row-props="rowProps" :sort-asc-icon="sortAscIcon" :sort-desc-icon="sortDescIcon"
-                    :loading="loading" :color="color" :search="search"
-                    v-model:page="pagination.page" v-model="dtModel" @click:row="rowClick">
-                    <template v-slot:top="props">
-                        <slot v-bind="props" name="top"/>
+        <resizeable-splitter
+            :splitter-position="100 - (rightPanelWidth > 100 ? 80 : rightPanelWidth)"
+            :show-splitter="showRightPanel"
+            :is-fixed="rightPanelFixed">
+            <template #left-panel>
+                <v-data-table fixed-header ref="customDataTable" class="border-s"
+                    :height="tableHeight"
+                    :density="density"
+                    :sticky="sticky"
+                    :theme="theme"
+                    :color="color"
+                    :hover="hover"
+                    :mobile="mobile"
+                    :mobile-breakpoint="mobileBreakpoint"
+                    :loading="loading"
+                    :loading-text="loadingText"
+                    :hide-no-data="hideNoData"
+                    :no-data-text="noDataText"
+                    :sort-asc-icon="sortAscIcon"
+                    :sort-desc-icon="sortDescIcon"
+                    :row-props="rowProps"
+                    :cell-props="cellProps"
+                    :show-expand="showExpand"
+                    :show-select="showSelect"
+                    :headers="tableHeaders"
+                    :items="filteredItems"
+                    :select-strategy="selectStrategy"
+                    :item-selectable="itemSelectable"
+                    :item-value="itemValue"
+                    :return-object="returnObject"
+                    :custom-key-sort="customKeySort"
+                    :disable-sort="disableSort"
+                    :multi-sort="multiSort"
+                    :must-sort="mustSort"
+                    :expand-on-click="expandOnClick"
+                    :custom-filter="customFilter"
+                    :custom-key-filter="customKeyFilter"
+                    :filter-keys="filterKeys"
+                    :filter-mode="filterMode"
+                    :value-comparator="valueComparator"
+                    :search="search"
+                    v-model="dtModel"
+                    v-model:page="dtPage"
+                    v-model:items-per-page="dtItemsPerPage"
+                    v-model:sort-by="dtSortBy"
+                    v-model:group-by="dtGroupBy"
+                    v-model:expanded="dtExpanded"
+                    @click:row="rowClick"
+                    @update:currentItems="updateCurrentItems"
+                    @update:options="updateOptions">
+
+                    <template v-if="slots.body" #body="props">
+                        <slot name="body" v-bind="props"/>
                     </template>
-                    <template v-slot:headers="props">
-                        <slot v-bind="props" name="headers">
+                    <template v-if="slots['body.prepend']" #[`body.prepend`]="props">
+                        <slot name="body.prepend" v-bind="props"/>
+                    </template>
+                    <template v-if="slots['body.append']" #[`body.append`]="props">
+                        <slot name="body.append" v-bind="props"/>
+                    </template>
+                    <template v-if="slots.top" #top="props">
+                        <slot name="top" v-bind="props"/>
+                    </template>
+                    <template v-if="slots['expanded-row']" #expanded-row="props">
+                        <slot name="expanded-row" v-bind="props"/>
+                    </template>
+                    <template v-if="slots.colgroup" #colgroup="props">
+                        <slot name="colgroup" v-bind="props"/>
+                    </template>
+                    <template v-if="slots.default" #default="props">
+                        <slot name="default" v-bind="props"/>
+                    </template>
+                    <template v-if="slots.item" #item="props">
+                        <slot name="item" v-bind="props"/>
+                    </template>
+                    <template v-if="slots['item.data-table-expand']" #[`item.data-table-expand`]="props">
+                        <slot name="item.data-table-expand" v-bind="props"/>
+                    </template>
+                    <template v-if="slots['item.data-table-select']" #[`item.data-table-select`]="props">
+                        <slot name="item.data-table-select" v-bind="props"/>
+                    </template>
+                    <template v-if="slots.loader" #loader="props">
+                        <slot name="loader" v-bind="props"/>
+                    </template>
+                    <template v-if="slots.loading" #loading>
+                        <slot name="loading" />
+                    </template>
+                    <template v-if="slots['no-data']" #no-data>
+                        <slot name="no-data" />
+                    </template>
+                    <template v-if="slots.tbody" #tbody="props">
+                        <slot name="tbody" v-bind="props"/>
+                    </template>
+                    <template v-if="slots.tfoot" #tfoot="props">
+                        <slot name="tfoot" v-bind="props"/>
+                    </template>
+                    <template v-if="slots.thead" #thead="props">
+                        <slot name="thead" v-bind="props"/>
+                    </template>
+                    
+
+                    <template #headers="props">
+                        <slot name="headers" v-bind="props">
                             <template v-for="(header, hIndex) in props.headers" :key="hIndex">
                                 <tr>
                                     <template v-for="column in header" :key="column.key">
-                                        <slot v-bind="header" :name="`header.${column.key}`">
-                                            <th class="bg-grey-lighten-4 dt-header-border" :style="[headerStyle(column)]"
-                                                :rowspan="column.rowspan" :colspan="column.colspan"
-                                                v-if="column.key !== 'data-table-select'">
-                                                <span v-if="checkIsSortable(column)" class="mr-2 cursor-pointer"
-                                                    :style="localHeaderTextSize" @click="() => props.toggleSort(column)">{{
-                                                        column.title }}</span>
+                                        <slot :name="`header.${column.key}`" v-bind="getHeaderProps(props, column)">
+                                            <th v-if="column.key !== 'data-table-select'"
+                                                class="bg-grey-lighten-4 border-s"
+                                                :style="[headerStyle(column)]"
+                                                :rowspan="column.rowspan" :colspan="column.colspan">
+                                                <span v-if="checkIsSortable(column)"
+                                                    class="mr-2 cursor-pointer"
+                                                    :style="localHeaderTextSize"
+                                                    @click="() => props.toggleSort(column)">
+                                                    {{column.title }}
+                                                </span>
                                                 <span v-else :style="localHeaderTextSize">{{ column.title }}</span>
                                                 <template v-if="props.isSorted(column)">
                                                     <v-icon :style="localHeaderIconSize" :icon="props.getSortIcon(column)"/>
                                                 </template>
                                                 <template v-if="checkIsGroupable(column)">
-                                                    <v-icon v-if="checkIsGroupBy(column.key)" class="cursor-pointer"
+                                                    <v-icon v-if="checkIsGroupBy(column.key)"
+                                                        class="cursor-pointer"
                                                         :style="localHeaderIconSize"
                                                         :icon="getGroupSortIcon(column.key)"
                                                         @click="sortByGroup(column.key)"/>
-                                                    <v-icon v-else :style="localHeaderIconSize" class="cursor-pointer" :icon="groupByIcon"
-                                                        @click="onGroupBy(column.key)" />
+                                                    <v-icon v-else
+                                                        class="cursor-pointer"
+                                                        :style="localHeaderIconSize"
+                                                        :icon="groupByIcon"
+                                                        @click="onGroupBy(column.key)"/>
                                                 </template>
                                             </th>
-                                            <th class="bg-grey-lighten-4 dt-header-border" :rowspan="column.rowspan"
-                                                :colspan="column.colspan" v-else>
-                                                <v-icon v-show="selectStrategy !== 'single'" :icon="getSelectAllIcon(props)"
-                                                    @click="onSelectAll(props)" />
+                                            <th v-else
+                                                class="bg-grey-lighten-4 border-s"
+                                                :rowspan="column.rowspan"
+                                                :colspan="column.colspan">
+                                                <v-icon v-show="selectStrategy !== 'single'"
+                                                    :icon="getSelectAllIcon(props)"
+                                                    @click="onSelectAll(props)"/>
                                             </th>
                                         </slot>
                                     </template>
@@ -575,27 +858,44 @@ function print() {
                             </template>
                         </slot>
                         <tr v-if="!hideFilterRow">
-                            <th class="bg-grey-lighten-4 dt-header-border"
+                            <th class="bg-grey-lighten-4 border-s"
                                 v-for="(column, index) in getHeaders(props.columns)" :key="index">
                                 <template v-if="column.filterable !== false">
-                                    <v-select hide-details center-affix v-if="column.filterMode === FILTER_MODE.SELECTION"
-                                        variant="plain" density="compact" :color="color" item-value="value"
-                                        item-title="title" :items="column.filterItems" v-model="column.filterValue"
+                                    <v-select v-if="column.filterMode === FilterMode.Selection"
+                                        hide-details center-affix 
+                                        variant="plain"
+                                        density="compact"
+                                        item-title="title"
+                                        item-value="value"
+                                        :theme="theme"
+                                        :color="color"
+                                        :items="column.filterItems" 
                                         :list-props="{
                                             lines: false,
                                             density: 'compact'
-                                        }" />
-                                    <v-text-field hide-details center-affix v-else variant="plain" density="compact"
-                                        placeholder="Search" v-model="column.filterValue">
-                                        <template v-slot:append>
-                                            <v-menu :z-index="filterMenuZIndex">
-                                                <template v-slot:activator="{ props }">
-                                                    <v-btn :color="color" variant="text" size="x-small" :icon="filterIcon"
-                                                        v-bind="props" />
+                                        }"
+                                        v-model="column.filterValue"/>
+                                    <v-text-field v-else 
+                                        hide-details center-affix
+                                        variant="plain"
+                                        density="compact"
+                                        placeholder="Search"
+                                        :theme="theme"
+                                        v-model="column.filterValue">
+                                        <template #append>
+                                            <v-menu :z-index="filterMenuZIndex" :theme="theme">
+                                                <template #activator="{ props }">
+                                                    <v-btn
+                                                        variant="text"
+                                                        size="x-small"
+                                                        :color="color"
+                                                        :icon="filterIcon"
+                                                        v-bind="props"/>
                                                 </template>
-                                                <v-list density="compact" :lines="false" :color="color">
+                                                <v-list density="compact" :lines="false" :color="color" :theme="theme">
                                                     <v-list-item v-for="filter in filterTypes" :key="filter.value"
-                                                        :title="filter.title" :active="column.filterType === filter.value"
+                                                        :title="filter.title"
+                                                        :active="column.filterType === filter.value"
                                                         @click="column.filterType = filter.value" />
                                                 </v-list>
                                             </v-menu>
@@ -605,69 +905,70 @@ function print() {
                             </th>
                         </tr>
                     </template>
-                    <template v-slot:group-header="props">
-                        <slot v-bind="props" name="group-header">
+                    <template #group-header="props">
+                        <slot name="group-header" v-bind="getGroupProps(props)">
                             <tr>
                                 <td :colspan="props.columns.length">
-                                    <v-icon :class="`ml-${props.item.depth * 3}`" size="small"
-                                        @click="props.toggleGroup(props.item)"
-                                        :icon="props.isGroupOpen(props.item) ? '$expand' : '$next'" />
-                                    <span>{{ gropHeaderDisplayText(props.item, props.columns) }}</span>
-                                    <v-icon size="small" class="ml-4" @click="onRemoveGroupBy(props.item.key)"
-                                        icon="$delete" />
+                                    <v-icon
+                                        :class="`ml-${props.item.depth * 3}`" size="small"
+                                        :icon="props.isGroupOpen(props.item) ? '$expand' : '$next'"
+                                        @click="props.toggleGroup(props.item)"/>
+                                    <span>{{ groupHeaderDisplayText(props.item, props.columns) }}</span>
+                                    <v-icon
+                                        size="small"
+                                        class="ml-4"
+                                        icon="$delete"
+                                        @click="onRemoveGroupBy(props.item.key)"/>
                                 </td>
                             </tr>
                         </slot>
                     </template>
-                    <template v-for="header in tableHeaders" v-slot:[`item.${header.key}`]="props">
-                        <slot v-bind="props" :name="`item.${header.key}`">
-                            <template v-if="typeof header.formatCellValue === 'function'">
-                                {{ header.formatCellValue(props.value) }}
-                            </template>
-                            <template v-else>
-                                {{ props.value }}
-                            </template>
+                    <template v-for="header in tableHeaders" #[`item.${header.key}`]="props">
+                        <slot :name="`item.${header.key}`" v-bind="props">{{ props.value }}</slot>
+                    </template>
+                    <template #bottom="props">
+                        <slot name="bottom" v-bind="props">
+                            <v-toolbar v-if="!hideFooter" density="comfortable" :theme="theme">
+                                <span class="text-caption mx-1">Items per page</span>
+                                <div style="width: 100px;">
+                                    <v-select hide-details
+                                        density="compact"
+                                        variant="outlined"
+                                        item-title="title"
+                                        item-value="value"
+                                        :theme="theme"
+                                        v-model="dtItemsPerPage"
+                                        :items="itemsPerPageOptions"
+                                        @update:model-value="onChangeItemPerPage"/>
+                                </div>
+                                <v-pagination
+                                    class="ml-2"
+                                    density="comfortable"
+                                    rounded="circle"
+                                    total-visible="7"
+                                    :active-color="color"
+                                    :first-icon="firstIcon"
+                                    :last-icon="lastIcon"
+                                    :next-icon="nextIcon"
+                                    :prev-icon="prevIcon"
+                                    v-model="dtPage"
+                                    :length="pages"/>
+                                <v-spacer />
+                                <span class="pr-2">{{ pageDetail }}</span>
+                                <v-btn v-if="!hideRefreshButton"
+                                    variant="text"
+                                    size="small"
+                                    :icon="refreshIcon"
+                                    @click="$emit('click:refresh')" />
+                            </v-toolbar>
                         </slot>
-                    </template>
-                    <template v-slot:expanded-row="props">
-                        <slot v-bind="props" name="expanded-row" />
-                    </template>
-                    <template v-slot:no-data>
-                        <slot name="no-data">No data available</slot>
-                    </template>
-                    <template v-slot:bottom>
-                        <v-toolbar v-if="!hideFooter" density="comfortable">
-                            <span class="text-caption mx-1">Items per page</span>
-                            <div style="width: 100px;">
-                                <v-select hide-details density="compact" variant="outlined"
-                                    v-model="pagination.itemsPerPage" item-title="title" item-value="value"
-                                    :items="itemsPerPageOptions" @update:model-value="pagination.page = 1" />
-                            </div>
-                            <v-pagination class="ml-2" density="comfortable" rounded="circle" :active-color="color"
-                                total-visible="7" :first-icon="firstIcon" :last-icon="lastIcon" :next-icon="nextIcon" :prev-icon="prevIcon"
-                                v-model="pagination.page" :length="pages" />
-                            <v-spacer />
-                            <span class="pr-2">{{ pageDetail }}</span>
-                            <v-btn v-if="!hideRefreshButton" variant="text" :icon="refreshIcon" size="small"
-                                @click="$emit('refreshClick')" />
-                        </v-toolbar>
                     </template>
                 </v-data-table>
             </template>
-            <template v-slot:right-pane>
-                <slot name="right-area" />
+            <template #right-panel>
+                <slot name="right-panel" />
             </template>
         </resizeable-splitter>
         <slot name="bottom-area" />
     </v-card>
 </template>
-
-<style>
-.dt-header-border {
-    border-right: solid 1px rgba(0, 0, 0, 0.12);
-}
-
-.dt-row-highlight {
-    background: rgba(0, 0, 0, 0.06) !important;
-}
-</style>
