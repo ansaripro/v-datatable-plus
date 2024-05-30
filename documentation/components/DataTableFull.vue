@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue'
-import { FilterType, FilterMode } from 'v-datatable-plus'
+import { FilterType, FilterMode } from '../../dist/v-datatable-plus'
 
 const showRightPanel = ref(false);
 const rightPanelFixed = ref(false);

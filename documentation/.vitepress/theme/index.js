@@ -2,9 +2,9 @@ import DefaultTheme from 'vitepress/theme';
 import { createVuetify } from "vuetify";
 import * as components from 'vuetify/components'
 import { aliases, md } from 'vuetify/iconsets/md'
-import VDataTalePlusPlugin from 'v-datatable-plus'
+import VDataTalePlusPlugin from '../../../dist/v-datatable-plus'
 import "vuetify/styles";
-import 'v-datatable-plus/dist/style.css'
+import '../../../dist/style.css'
 import './custom.css'
 
 // import FullScreen from '../../components/FullScreen.vue';
