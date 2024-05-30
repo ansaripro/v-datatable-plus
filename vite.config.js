@@ -39,4 +39,7 @@ export default defineConfig({
       },
     },
   },
+  ssr: {
+    noExternal: [ /\.css$/, /^vuetify/ ],
+  },
 })
