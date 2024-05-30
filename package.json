@@ -42,8 +42,7 @@
     "preview": "vite preview",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
-    "docs:serve": "vitepress serve docs",
-    "deploy": "gh-pages -d docs"
+    "docs:serve": "vitepress serve docs"
   },
   "dependencies": {
     "vue": "^3.3.11",
