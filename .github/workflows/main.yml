@@ -34,7 +34,7 @@ jobs:
         mkdir docs
         npm install --g gh-pages
         npm i
-        npm run build:docs
+        npm run docs:build
         git remote set-url origin https://git:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
         npm run deploy -u "github-actions-bot <support+actions@github.com>"
       env:
