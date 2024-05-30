@@ -43,6 +43,8 @@ jobs:
         run: npm ci 
       - name: Run Repository Build
         run: npm run build
+      - name: Link package
+        run: npm link
       - name: Build with VitePress
         run: npm run docs:build 
       - name: Upload artifact

@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue'
-import { FilterType } from '../../dist/v-datatable-plus'
+import { FilterType } from 'v-datatable-plus'
 
 const headers = ref([
   {
