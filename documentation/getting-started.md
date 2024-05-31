@@ -6,26 +6,7 @@
 [Vuetify V3](https://vuetifyjs.com/en/) version 3.6.7 or latest<br/>
 [Vuedraggable](https://github.com/SortableJS/vue.draggable.next) version 4.1.0 or latest (vuedraggable@next)<br/>
 
-Required Vuetify components for VDatatablePlus and VDatatableServerPlus
-```js
-import {
-    VDataTable,
-    VToolbar,
-    VToolbarTitle,
-    VSelect,
-    VList,
-    VListItem,
-    VListItemAction,
-    VMenu,
-    VBtn,
-    VCard,
-    VIcon,
-    VCheckboxBtn,
-    VPagination,
-    VSpacer,
-    VTextField,
-} from 'vuetify/components';
-```
+Required Vuetify components for VDatatablePlus and VDatatableServerPlus [Vuetify Autoimport](#vuetify-autoimport) 
 
 ## Installation
 
@@ -99,6 +80,44 @@ const items = ref([
 ])
 </script>
 ```
+
+## Vuetify Autoimport
+If you are using vuetify autoimport then you will need to import those below components manually which you are not using in your application.
+
+```js
+import {
+    VDataTable,
+    VDataTableServer,
+    VToolbar,
+    VToolbarTitle,
+    VSelect,
+    VList,
+    VListItem,
+    VListItemAction,
+    VMenu,
+    VBtn,
+    VCard,
+    VIcon,
+    VCheckboxBtn,
+    VPagination,
+    VSpacer,
+    VTextField,
+} from 'vuetify/components';
+```
+For example import only VDataTable in App.vue in case of using v-datatable-plus component and other required vuetify components already in utlized in the application.
+
+::: code-group
+```vue [App.vue]
+<template>
+  <div id="app"/>
+</template>
+
+<script setup>
+import { VDataTable } from 'vuetify/components';
+</script>
+```
+:::
+
 
 ## FilterType
 ::: raw
