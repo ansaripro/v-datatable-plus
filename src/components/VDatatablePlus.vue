@@ -308,10 +308,10 @@ const filterTypes = reactive([
 ]);
 // Helper Properties
 const slots = useSlots();
-const currentPage = ref(1);
-const curentItemPerPage = ref(10);
-const currentSortBy = ref([]);
-const currentGroupBy = ref([]);
+const currentPage = ref(props.page);
+const curentItemPerPage = ref(props.itemsPerPage);
+const currentSortBy = ref(props.sortBy);
+const currentGroupBy = ref(props.groupBy);
 
 
 // Computed
