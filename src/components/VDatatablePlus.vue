@@ -455,7 +455,14 @@ function getHeaders(columns) {
     if (columns && columns.length > 0) {
         return columns.map((c) => {
             const h = localHeaders.value.find(x => x.key === c.key);
-            if (h) return h;
+            if (h) {
+                h.align = c.align;
+                h.width = c.width;
+                h.fixed = c.fixed;
+                h.fixedOffset = c.fixedOffset;
+                h.lastFixed = c.lastFixed;
+                return h;
+            }
             c.filterable = false;
             return c;
         });
@@ -529,17 +536,21 @@ function getGroupProps(props) {
     return {...props, onRemoveGroupBy: onRemoveGroupBy};
 }
 function headerStyle(column) {
+    const obj = {};
     if (column) {
+        obj['textAlign'] = column.align;
         const width = column.width;
         if (width > 0 || (typeof width === 'string' && width.length > 0)) {
-            return {
-                width: `${width}px`,
-                minWidth: `${width}px`,
-                textAlign: column.align,
-            };
+            obj['width'] = `${width}px`;
+            obj['minWidth'] = `${width}px`;
+        }
+        if (column.fixed && column.fixedOffset >= 0) {
+            obj['position'] = 'sticky';
+            obj['left'] = `${column.fixedOffset}px`;
+            obj['z-index'] = 2;
         }
     }
-    return {};
+    return obj;
 }
 function updateCurrentItems(obj) {
     emit('update:currentItems', obj);
@@ -816,18 +827,20 @@ function print() {
                             <template v-for="(header, hIndex) in props.headers" :key="hIndex">
                                 <tr>
                                     <template v-for="column in header" :key="column.key">
-                                        <slot :name="`header.${column.key}`" v-bind="getHeaderProps(props, column)">
-                                            <th v-if="column.key !== 'data-table-select'"
-                                                class="bg-grey-lighten-4 border-s"
-                                                :style="[headerStyle(column)]"
-                                                :rowspan="column.rowspan" :colspan="column.colspan">
-                                                <span v-if="checkIsSortable(column)"
+                                        <th class="bg-grey-lighten-4 border-s"
+                                            :style="[headerStyle(column)]"
+                                            :rowspan="column.rowspan" :colspan="column.colspan">
+                                            <slot :name="`header.${column.key}`" v-bind="getHeaderProps(props, column)">
+                                                <v-icon v-if="column.key === 'data-table-select'" v-show="selectStrategy !== 'single'"
+                                                    :icon="getSelectAllIcon(props)"
+                                                    @click="onSelectAll(props)"/>
+                                                <span v-else-if="checkIsSortable(column)"
                                                     class="mr-2 cursor-pointer"
                                                     :style="localHeaderTextSize"
                                                     @click="() => props.toggleSort(column)">
                                                     {{column.title }}
                                                 </span>
-                                                <span v-else :style="localHeaderTextSize">{{ column.title }}</span>
+                                                <span v-else :style="localHeaderTextSize">{{ column.title }}</span>                                                
                                                 <template v-if="props.isSorted(column)">
                                                     <v-icon :style="localHeaderIconSize" :icon="props.getSortIcon(column)"/>
                                                 </template>
@@ -843,26 +856,20 @@ function print() {
                                                         :icon="groupByIcon"
                                                         @click="onGroupBy(column.key)"/>
                                                 </template>
-                                            </th>
-                                            <th v-else
-                                                class="bg-grey-lighten-4 border-s"
-                                                :rowspan="column.rowspan"
-                                                :colspan="column.colspan">
-                                                <v-icon v-show="selectStrategy !== 'single'"
-                                                    :icon="getSelectAllIcon(props)"
-                                                    @click="onSelectAll(props)"/>
-                                            </th>
-                                        </slot>
+                                            </slot>
+                                        </th>
                                     </template>
                                 </tr>
                             </template>
                         </slot>
                         <tr v-if="!hideFilterRow">
-                            <th class="bg-grey-lighten-4 border-s"
-                                v-for="(column, index) in getHeaders(props.columns)" :key="index">
+                            <th v-for="(column, index) in getHeaders(props.columns)"
+                                class="bg-grey-lighten-4 border-s"
+                                :style="[headerStyle(column)]"
+                                :key="index">
                                 <template v-if="column.filterable !== false">
-                                    <v-select v-if="column.filterMode === FilterMode.Selection"
-                                        hide-details center-affix 
+                                    <v-select hide-details center-affix
+                                        v-if="column.filterMode === FilterMode.Selection"
                                         variant="plain"
                                         density="compact"
                                         item-title="title"
@@ -875,8 +882,7 @@ function print() {
                                             density: 'compact'
                                         }"
                                         v-model="column.filterValue"/>
-                                    <v-text-field v-else 
-                                        hide-details center-affix
+                                    <v-text-field hide-details center-affix v-else
                                         variant="plain"
                                         density="compact"
                                         placeholder="Search"
