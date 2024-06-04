@@ -111,16 +111,9 @@ const items = ref([
 </script>
 
 <template>
-  <v-datatable-plus hide-refresh-button
+  <v-datatable-plus
       title="Title"
       color="primary"
-      drag-menu-icon="list"
-      drag-item-icon="drag_indicator"
-      group-by-icon="category"
-      group-sort-asc-icon="file_upload"
-      group-sort-desc-icon="file_download"
-      print-icon="print"
-      filter-icon="filter_alt"
       :items="items"
       v-model:headers="headers"/>
 </template>

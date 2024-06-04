@@ -186,7 +186,6 @@ function matchFilter(type, value, searchVal) {
 }
 const FakeAPI = {
   async fetch ({ page, itemsPerPage, sortBy, filters }) {
-    console.log(filters);
     return new Promise(resolve => {
       setTimeout(() => {
         const start = (page - 1) * itemsPerPage
@@ -218,20 +217,16 @@ const FakeAPI = {
 </script>
 
 <template>
-  <v-datatable-server-plus hide-refresh-button
+  <v-datatable-server-plus
       title="Title"
       color="primary"
-      drag-menu-icon="list"
-      drag-item-icon="drag_indicator"
-      group-by-icon="category"
-      group-sort-asc-icon="file_upload"
-      group-sort-desc-icon="file_download"
-      remove-search-icon="zoom_out"
-      print-icon="print"
-      filter-icon="filter_alt"
       :items-length="totalItems"
       :loading="loading"
       :items="serverItems"
       v-model:headers="headers"
-      @update:options="loadItems"/>
+      @update:options="loadItems">
+      <template #header-commands="props">
+        <v-btn @click="() => props.clearSearch()" prepend-icon="mdi-magnify-minus">REMOVE SEARCH</v-btn>
+      </template>
+  </v-datatable-server-plus>      
 </template>

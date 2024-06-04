@@ -26,10 +26,6 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
-    hideRefreshButton: {
-        type: Boolean,
-        default: false,
-    },
     selectOnRow: {
       type: Boolean,
       default: false,
@@ -249,10 +245,6 @@ const props = defineProps({
         type: String,
         default: 'mdi-sort-descending',
     },
-    removeSearchIcon: {
-        type: String,
-        default: 'mdi-magnify-minus',
-    },
     dragMenuIcon: {
         type: String,
         default: '$menu',
@@ -261,9 +253,13 @@ const props = defineProps({
         type: String,
         default: 'mdi-drag-vertical',
     },
-    refreshIcon: {
+    dragItemFreezeIcon: {
         type: String,
-        default: '$loading',
+        default: 'mdi-table-lock',
+    },
+    dragItemUnFreezeIcon: {
+        type: String,
+        default: 'mdi-table',
     },
     filterIcon: {
         type: String,
@@ -282,11 +278,11 @@ const emit = defineEmits([
     'update:sortBy',
     'update:headers',
     'update:selectedRow',
-    'click:refresh',
     'click:row',
     'columnMenuOpened',
     'columnMenuDragChange',
-    'columnMenuChecked'
+    'columnMenuChecked',
+    'columnMenuFixed'
 ]);
 
 // Data properties
@@ -588,16 +584,24 @@ function rowClick($event, param) {
                     <Draggable v-model="localHeaders" item-key="key" handle=".cursor-move"
                         @change="$emit('columnMenuDragChange', $event)">
                         <template #item="{ element }">
-                            <v-list-item>
+                            <v-list-item density="compact">
                                 <template #prepend>
                                     <v-list-item-action start>
-                                        <v-checkbox-btn :color="color" v-model="element.isShow"
+                                        <v-checkbox-btn density="compact"
+                                            :color="color"
+                                            v-model="element.isShow"
                                             @change="$emit('columnMenuChecked', { element, $event })" />
                                     </v-list-item-action>
                                 </template>
                                 {{ element.title }}
                                 <template #append>
-                                    <v-icon size="small" density="compact" class="cursor-move" :icon="dragItemIcon" />
+                                    <v-checkbox-btn density="compact" v-if="element.fixable"
+                                        :true-icon="dragItemFreezeIcon"
+                                        :false-icon="dragItemUnFreezeIcon"
+                                        :color="color"
+                                        v-model="element.fixed"
+                                        @change="$emit('columnMenuFixed', { element, $event })" />
+                                    <v-icon size="small" density="compact" class="cursor-move" :icon="dragItemIcon" v-if="element.draggable !== false" />
                                 </template>
                             </v-list-item>
                         </template>
@@ -607,9 +611,7 @@ function rowClick($event, param) {
             <v-toolbar-title>
                 <slot name="title">{{ title }}</slot>
             </v-toolbar-title>
-            <slot name="pre-header-commands" />
-            <v-btn v-if="!hideFilterRow" @click="resetFilter" :prepend-icon="removeSearchIcon">REMOVE SEARCH</v-btn>
-            <slot name="post-header-commands" />
+            <slot name="header-commands" :clearSearch="resetFilter"/>
         </v-toolbar>
         <slot name="header-expand-section" />
         <resizeable-splitter :splitter-position="100 - (rightPanelWidth > 100 ? 80 : rightPanelWidth)"
@@ -848,7 +850,7 @@ function rowClick($event, param) {
                                     v-model="dtPage"/>
                                 <v-spacer/>
                                 <span class="pr-2">{{ pageDetail }}</span>
-                                <v-btn v-if="!hideRefreshButton" variant="text" :icon="refreshIcon" size="small" @click="$emit('click:refresh')" />
+                                <slot name="footer-append"/>
                             </v-toolbar>
                         </slot>
                     </template>

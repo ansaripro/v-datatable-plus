@@ -1,7 +1,7 @@
 import DefaultTheme from 'vitepress/theme';
 import { createVuetify } from "vuetify";
 import * as components from 'vuetify/components'
-import { aliases, md } from 'vuetify/iconsets/md'
+import { aliases, mdi } from 'vuetify/iconsets/mdi'
 import VDataTalePlusPlugin from 'v-datatable-plus'
 import "vuetify/styles";
 import 'v-datatable-plus/dist/style.css'
@@ -18,9 +18,9 @@ const vuetify = createVuetify({
       },
   },
   icons: {
-      defaultSet: 'md',
+      defaultSet: 'mdi',
       aliases,
-      sets: { md },
+      sets: { mdi },
   },
 });
 export default {

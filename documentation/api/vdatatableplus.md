@@ -20,6 +20,8 @@ const propsItems = ref([
             allFilterValue?: any | undefined<br/>
             filterValue?: any | undefined<br/>
             filterItems?: [any] | undefined<br/>
+            draggable?: boolean | undefined<br/>
+            fixable?: boolean | undefined<br/>
         `,
         default: 'undefined',
         detail: 'Other than default headers properties.'
@@ -67,6 +69,18 @@ const propsItems = ref([
         detail: 'Set icon for column menu item drag icon.'
     },
     {
+        name: 'drag-item-freeze-icon',
+        type: 'string',
+        default: 'mdi-table-lock',
+        detail: 'Set icon for column menu item fixable freeze icon.'
+    },
+    {
+        name: 'drag-item-un-freeze-icon',
+        type: 'string',
+        default: 'mdi-table',
+        detail: 'Set icon for column menu item fixable unfreeze icon.'
+    },
+    {
          name: 'hide-filter-row',
          type: 'boolean',
          default: false,
@@ -88,19 +102,7 @@ const propsItems = ref([
         name: 'hide-footer',
         type: 'boolean',
         default: false,
-        detail: 'Hide footer i.e. pagination plus refresh button.'
-    },
-    {
-        name: 'hide-refresh-button',
-        type: 'boolean',
-        default: false,
-        detail: 'Hide footer refresh button.'
-    },
-    {
-        name: 'refresh-icon',
-        type: 'string',
-        default: '$loading',
-        detail: 'Set icon for footer refresh button.'
+        detail: 'Hide footer i.e. pagination.'
     },
     {
         name: 'show-print',
@@ -207,11 +209,6 @@ const eventsItems = ref([
         detail: 'Emit on "selected-row" change.'
     },
     {
-        name: 'click:refresh',
-        type: '[any]',
-        detail: 'Trigger on click footer refresh button.'
-    },
-    {
         name: 'click:row',
         type: '[any]',
         detail: 'Trigger on row click.'
@@ -230,6 +227,11 @@ const eventsItems = ref([
         name: 'columnMenuChecked',
         type: '[any]',
         detail: 'Trigger on column show/hide checkbox click.'
+    },
+    {
+        name: 'columnMenuFixed',
+        type: '[any]',
+        detail: 'Trigger on column freeze/unfreeze checkbox icon click.'
     },
 ]);
 
@@ -254,6 +256,10 @@ const slotsItems = ref([
     {
         name: 'header-expand-section',
         detail: 'Slot below the Titlebar and above from VDataTable.'
+    },
+    {
+        name: 'footer-append',
+        detail: 'Slot in footer after pagination detail.'
     },
     {
         name: 'right-panel',

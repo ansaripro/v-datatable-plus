@@ -12,12 +12,15 @@ const headers = ref([
     key: 'name',
     title: 'Boat Type',
     filterType: FilterType.Contains,
+    fixable: true,
+    draggable: false,
   },
   { 
     isShow: true,
     key: 'speed',
     title: 'Speed (knots)',
     filterType: FilterType.Contains,
+    fixable: true,
     groupable: true
   },
   {
@@ -153,13 +156,6 @@ onMounted(() => {
 <template>
   <v-datatable-plus show-print select-on-row highlight-row return-object
       color="primary"
-      drag-menu-icon="list"
-      drag-item-icon="drag_indicator"
-      group-by-icon="category"
-      group-sort-asc-icon="file_upload"
-      group-sort-desc-icon="file_download"
-      print-icon="print"
-      filter-icon="filter_alt"
       row-highlight-class="text-red"
       :right-panel-width="40"
       :right-panel-fixed="rightPanelFixed"
@@ -167,7 +163,6 @@ onMounted(() => {
       :items="items"
       v-model:headers="headers"
       v-model:selected-row="selectedRow"
-      @click:refresh="addBoats"
       @click:row="rowClick">
       <template #title>
         Title Slot
@@ -192,6 +187,9 @@ onMounted(() => {
       </template>
       <template #bottom-area>
         <div class="pa-4 bg-secondary">Bottom Area</div>
+      </template>
+      <template #footer-append>
+        <v-btn variant="text" icon="$plus" size="small" @click="addBoats" />
       </template>
     </v-datatable-plus>
 </template>
