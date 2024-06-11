@@ -7,8 +7,8 @@
     <img alt="NPM Downloads" src="https://img.shields.io/npm/dm/v-datatable-plus">
   </a>
   <br>
-  <a href="https://github.com/vuetifyjs/vuetify/blob/master/LICENSE.md">
-    <img src="https://img.shields.io/npm/l/vuetify.svg" alt="License">
+  <a href="https://github.com/ansaripro/v-datatable-plus/blob/main/LICENSE.md">
+    <img alt="GitHub License" src="https://img.shields.io/github/license/ansaripro/v-datatable-plus">
   </a>
   <a href="https://www.npmjs.com/package/v-datatable-plus">
     <img alt="NPM Version" src="https://img.shields.io/npm/v/v-datatable-plus">
