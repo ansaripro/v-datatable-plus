@@ -105,18 +105,6 @@ const propsItems = ref([
         detail: 'Hide footer i.e. pagination.'
     },
     {
-        name: 'show-print',
-        type: 'boolean',
-        default: false,
-        detail: 'Show print button on title bar.'
-    },
-    {
-        name: 'print-icon',
-        type: 'string',
-        default: 'mdi-printer',
-        detail: 'Set icon for print button'
-    },
-    {
         name: 'show-right-panel',
         type: 'boolean',
         default: false,
@@ -246,12 +234,8 @@ const slotsItems = ref([
         detail: 'Title slot in Titlebar.'
     },
     {
-        name: 'pre-header-commands',
-        detail: 'Slot before Print button in Titlebar.'
-    },
-    {
-        name: 'post-header-commands',
-        detail: 'Slot after Print button in Titlebar.'
+        name: 'header-commands',
+        detail: 'Slot in Titlebar on the right side.'
     },
     {
         name: 'header-expand-section',

@@ -14,10 +14,6 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
-    showPrint: {
-        type: Boolean,
-        default: false,
-    },
     showRightPanel: {
         type: Boolean,
         default: false,
@@ -236,10 +232,6 @@ const props = defineProps({
         default: '$prev',
     },
     // custom
-    printIcon: {
-        type: String,
-        default: 'mdi-printer',
-    },
     dragMenuIcon: {
         type: String,
         default: '$menu',
@@ -722,9 +714,7 @@ function print() {
             <v-toolbar-title>
                 <slot name="title">{{ title }}</slot>
             </v-toolbar-title>
-            <slot name="pre-header-commands" />
-            <v-btn v-if="showPrint" @click="print" :prepend-icon="printIcon">PRINT</v-btn>
-            <slot name="post-header-commands" />
+            <slot name="header-commands" :print="print"/>
         </v-toolbar>
         <slot name="header-expand-section" />
         <resizeable-splitter

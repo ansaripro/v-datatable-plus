@@ -151,7 +151,7 @@ const items = ref([
 ::: code-group
 ```vue [template]
 <template>
-  <v-datatable-plus show-print select-on-row highlight-row return-object
+  <v-datatable-plus select-on-row highlight-row return-object
       color="primary"
       row-highlight-class="text-red"
       :right-panel-width="40"
@@ -164,15 +164,8 @@ const items = ref([
       <template #title>
         Title Slot
       </template>
-      <template #pre-header-commands>
-        <v-chip color="primary">Pre Commands</v-chip>
-      </template>
-      <template #post-header-commands>
-        <v-btn
-          :prepend-icon="showRightPanel ? 'visibility_off' : 'visibility'"
-          @click="()=> showRightPanel = !showRightPanel">
-          {{showRightPanel ? 'Hide' : 'Show'}} Right Pane
-        </v-btn>
+      <template #header-commands="props">
+        <v-btn @click="props.print()" prepend-icon="mdi-printer">PRINT</v-btn>
       </template>
       <template #header-expand-section>
         <div class="pa-4 bg-secondary">Header expand section</div>
