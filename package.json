@@ -1,7 +1,7 @@
 {
   "name": "v-datatable-plus",
   "private": false,
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "This is a derived component which enahaced features of Vuetify VDataTable and VDataTableServer. It's also expose a ResizeableSplitter component which is useful for split horizontal contents with or without user interaction.",
   "type": "module",
   "keywords": [
@@ -28,8 +28,8 @@
       "require": "./dist/v-datatable-plus.umd.cjs"
     },
     "./dist/style.css": {
-      "import": "./dist/style.css",
-      "require": "./dist/style.css"
+      "import": "./dist/v-datatable-plus.css",
+      "require": "./dist/v-datatable-plus.css"
     }
   },
   "repository": {
@@ -45,20 +45,20 @@
     "docs:serve": "vitepress serve documentation"
   },
   "dependencies": {
-    "vue": "^3.3.11",
+    "vue": "^3.5.13",
     "vuedraggable": "^4.1.0",
-    "vuetify": "^3.6.7"
+    "vuetify": "^3.7.4"
   },
   "peerDependencies": {
-    "vue": "^3.3.11",
+    "vue": "^3.5.13",
     "vuedraggable": "^4.1.0",
-    "vuetify": "^3.6.7"
+    "vuetify": "^3.7.4"
   },
   "devDependencies": {
-    "vitepress": "^1.2.2",
-    "@vitejs/plugin-vue": "^5.0.4",
+    "@vitejs/plugin-vue": "^5.2.1",
     "postcss": "^8.4.38",
-    "vite": "^5.2.11",
-    "vite-plugin-vuetify": "^2.0.1"
+    "vite": "^6.1.0",
+    "vite-plugin-vuetify": "^2.1.0",
+    "vitepress": "^1.2.2"
   }
 }
