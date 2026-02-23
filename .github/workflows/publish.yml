@@ -1,9 +1,8 @@
-name: Publish package to npm
+name: Publish to npm
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
     paths:
       - package.json
       - package-lock.json
@@ -13,61 +12,43 @@ on:
       - vite.config.mjs
   workflow_dispatch:
 
-permissions:
-  contents: read
-  id-token: write
-
 jobs:
   publish:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write          # Required for npm OIDC trusted publishing
     steps:
-      - name: Checkout
-        uses: actions/checkout@v5
+      - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
+          registry-url: https://registry.npmjs.org   # Creates .npmrc — required for OIDC auth
 
-      - name: Install dependencies
-        run: npm ci
+      - run: npm ci
 
-      - name: Validate package
+      - name: Typecheck & build
         run: |
           npm run typecheck
           npm run build
 
-      - name: Compare local and published versions
-        id: versions
-        shell: bash
+      - name: Check if publish is needed
+        id: check
         run: |
-          PACKAGE_NAME=$(node -p "require('./package.json').name")
-          LOCAL_VERSION=$(node -p "require('./package.json').version")
-          PUBLISHED_VERSION=$(npm view "$PACKAGE_NAME" version 2>/dev/null || true)
-
-          echo "package_name=$PACKAGE_NAME" >> "$GITHUB_OUTPUT"
-          echo "local_version=$LOCAL_VERSION" >> "$GITHUB_OUTPUT"
-          echo "published_version=$PUBLISHED_VERSION" >> "$GITHUB_OUTPUT"
-
-          if [ "$LOCAL_VERSION" = "$PUBLISHED_VERSION" ]; then
-            echo "publish=false" >> "$GITHUB_OUTPUT"
-            echo "No publish needed: $PACKAGE_NAME@$LOCAL_VERSION is already on npm."
+          LOCAL=$(node -p "require('./package.json').version")
+          PUBLISHED=$(npm view v-datatable-plus version 2>/dev/null || echo "none")
+          echo "local=$LOCAL"       >> "$GITHUB_OUTPUT"
+          echo "published=$PUBLISHED" >> "$GITHUB_OUTPUT"
+          if [ "$LOCAL" = "$PUBLISHED" ]; then
+            echo "needed=false" >> "$GITHUB_OUTPUT"
+            echo "v$LOCAL already on npm — skipping publish."
           else
-            echo "publish=true" >> "$GITHUB_OUTPUT"
-            echo "Publishing $PACKAGE_NAME@$LOCAL_VERSION (current npm: ${PUBLISHED_VERSION:-none})."
+            echo "needed=true"  >> "$GITHUB_OUTPUT"
+            echo "Will publish v$LOCAL (npm has ${PUBLISHED})."
           fi
 
-      - name: Publish package (trusted publishing)
-        if: steps.versions.outputs.publish == 'true'
-        env:
-          NODE_AUTH_TOKEN: ""
-        run: npm publish --registry https://registry.npmjs.org --access public --provenance
-
-      - name: Publish summary
-        if: always()
-        run: |
-          echo "Package: ${{ steps.versions.outputs.package_name }}"
-          echo "Local version: ${{ steps.versions.outputs.local_version }}"
-          echo "Published version before run: ${{ steps.versions.outputs.published_version }}"
-          echo "Publish attempted: ${{ steps.versions.outputs.publish }}"
+      - name: Publish (OIDC trusted publishing)
+        if: steps.check.outputs.needed == 'true'
+        run: npm publish --provenance --access public
