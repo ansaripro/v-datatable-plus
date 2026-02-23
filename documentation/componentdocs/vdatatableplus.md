@@ -13,6 +13,9 @@ import DataTableFull from '../components/DataTableFull.vue'
 - This component uses native column drag-and-drop (no `vuedraggable` dependency).
 - If your app uses Vuetify auto-import/tree-shaking, make sure required Vuetify components are explicitly registered.
 - Drag event payload remains compatible via `columnMenuDragChange` with `{ moved: { element, oldIndex, newIndex } }`.
+- Header and filter-row theming can be customized using `header-cell-class` and `header-cell-style`.
+- Internal table and right panel can be customized using `table-class`, `table-style`, `right-panel-class`, and `right-panel-style`.
+- Additional Vuetify table props can be forwarded with `data-table-props`.
 
 ## Basic Usage
 

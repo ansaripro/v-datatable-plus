@@ -12,6 +12,9 @@ import ServerDataTable from '../components/ServerDataTable.vue'
 - Designed for server-side paging/sorting/filtering through `@update:options`.
 - If your app uses Vuetify auto-import/tree-shaking, explicitly register required Vuetify components.
 - Column drag-and-drop in the column menu is native and still emits `columnMenuDragChange`.
+- Header and filter-row theming can be customized using `header-cell-class` and `header-cell-style`.
+- Internal table and right panel can be customized using `table-class`, `table-style`, `right-panel-class`, and `right-panel-style`.
+- Additional Vuetify table props can be forwarded with `data-table-props`.
 
 ## Server-Side Usage
 

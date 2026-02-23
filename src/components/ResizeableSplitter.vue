@@ -1,22 +1,26 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch, onBeforeUnmount } from 'vue'
+import type { ResizeableSplitterProps } from '../types/components';
 
-const props = defineProps({
-  isFixed: {
-    type: Boolean,
-    default: true,
-  },
-  showSplitter: {
-    type: Boolean,
-    default: false,
-  },
-  splitterPosition: {
-    type: Number,
-    default: 100,
-  },
+const props = withDefaults(defineProps<ResizeableSplitterProps>(), {
+  isFixed: true,
+  showSplitter: false,
+  splitterPosition: 100,
 });
 
-const position = ref(props.splitterPosition);
+const parentRef = ref<HTMLElement | null>(null);
+const minPosition = 10;
+const maxPosition = 90;
+
+function clampPosition(percentage: number) {
+  return Math.min(maxPosition, Math.max(minPosition, percentage));
+}
+
+const position = ref(clampPosition(props.splitterPosition));
+
+watch(() => props.splitterPosition, (nextPosition) => {
+  position.value = clampPosition(nextPosition);
+});
 
 const leftPaneStyle = computed(() => {
   if (props.showSplitter) {
@@ -44,29 +48,46 @@ const splitterStyle = computed(() => {
         cursor: 'ew-resize',
       };
     }
-  } else return [{ display: 'none' }];
+  } else return { display: 'none' };
 });
 
-function handleDragging(ev: MouseEvent) {
-  const percentage = (ev.pageX / window.innerWidth) * 100
+function getPointerPercentage(clientX: number) {
+  if (!parentRef.value) return null;
+  const rect = parentRef.value.getBoundingClientRect();
+  if (rect.width <= 0) return null;
 
-  if (percentage >= 10 && percentage <= 90) {
-    position.value = Number(percentage.toFixed(2));
-  }
+  const percentage = ((clientX - rect.left) / rect.width) * 100;
+  return clampPosition(percentage);
 }
-function startDragging() {
-  if (props.isFixed) return;
+
+function handleDragging(ev: MouseEvent) {
+  const percentage = getPointerPercentage(ev.clientX);
+  if (percentage === null) return;
+  position.value = Number(percentage.toFixed(2));
+}
+
+function startDragging(ev: MouseEvent) {
+  if (props.isFixed || !props.showSplitter) return;
+
+  ev.preventDefault();
+  handleDragging(ev);
+  document.body.style.userSelect = 'none';
+
   document.addEventListener('mousemove', handleDragging);
   document.addEventListener('mouseup', endDragging);
 }
+
 function endDragging() {
   document.removeEventListener('mousemove', handleDragging);
   document.removeEventListener('mouseup', endDragging);
+  document.body.style.userSelect = '';
 }
+
+onBeforeUnmount(endDragging);
 </script>
 
 <template>
-  <div class="rs-parent-box">
+  <div ref="parentRef" class="rs-parent-box">
     <div class="rs-border" :style="leftPaneStyle">
       <slot name="left-panel" />
     </div>

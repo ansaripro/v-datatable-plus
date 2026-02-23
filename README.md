@@ -17,6 +17,9 @@
 
 `v-datatable-plus` provides enhanced wrappers around Vuetify `VDataTable` and `VDataTableServer`.
 
+## [Documentation](https://ansaripro.github.io/v-datatable-plus/)
+Find full documentation and live examples at the link above.
+
 ### Highlights
 
 - Header row filtering with typed filter modes (`FilterType`, `FilterMode`)
@@ -195,8 +198,6 @@ function onClickRow(payload: RowClickEventPayload) {
   />
 </template>
 ```
-
-## [Documentation](https://ansaripro.github.io/v-datatable-plus/)
 
 ## License
 

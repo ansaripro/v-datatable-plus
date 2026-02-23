@@ -27,6 +27,7 @@ export type {
 } from './datatable';
 
 export type {
+  ResizeableSplitterProps,
   VDatatablePlusProps,
   VDatatableServerPlusProps,
   VDatatablePlusEmits,

@@ -61,6 +61,34 @@ const props = defineProps({
     rowHighlightClass: String,
     headerTextSize: String,
     headerIconSize: String,
+    headerCellClass: {
+        type: [String, Array, Object],
+        default: undefined,
+    },
+    headerCellStyle: {
+        type: [String, Array, Object],
+        default: undefined,
+    },
+    tableClass: {
+        type: [String, Array, Object],
+        default: undefined,
+    },
+    tableStyle: {
+        type: [String, Array, Object],
+        default: undefined,
+    },
+    rightPanelClass: {
+        type: [String, Array, Object],
+        default: undefined,
+    },
+    rightPanelStyle: {
+        type: [String, Array, Object],
+        default: undefined,
+    },
+    dataTableProps: {
+        type: Object as PropType<Record<string, any>>,
+        default: () => ({}),
+    },
     // vuetify
     itemValue: String,
     color: String,
@@ -761,7 +789,8 @@ function print() {
             :show-splitter="showRightPanel"
             :is-fixed="rightPanelFixed">
             <template #left-panel>
-                <v-data-table fixed-header ref="customDataTable" class="border-s"
+                <v-data-table fixed-header ref="customDataTable" :class="['border-s', tableClass as any]" :style="tableStyle as any"
+                    v-bind="dataTableProps as any"
                     :height="tableHeight"
                     :density="density as any"
                     :sticky="sticky"
@@ -863,7 +892,8 @@ function print() {
                                 <tr>
                                     <template v-for="column in header" :key="column.key">
                                         <th class="vdtp-header-cell border-s"
-                                            :style="[headerStyle(column)]"
+                                            :class="headerCellClass as any"
+                                            :style="[headerStyle(column), headerCellStyle as any]"
                                             :rowspan="column.rowspan" :colspan="column.colspan">
                                             <slot :name="`header.${column.key}`" v-bind="getHeaderProps(props, column)">
                                                 <v-icon v-if="column.key === 'data-table-select'" v-show="selectStrategy !== 'single'"
@@ -900,7 +930,8 @@ function print() {
                         <tr v-if="!hideFilterRow">
                             <th v-for="(column, index) in getHeaders(props.columns)"
                                 class="vdtp-header-cell border-s"
-                                :style="[headerStyle(column)]"
+                                :class="headerCellClass as any"
+                                :style="[headerStyle(column), headerCellStyle as any]"
                                 :key="index">
                                 <template v-if="column.filterable !== false">
                                     <v-select hide-details center-affix
@@ -1003,7 +1034,9 @@ function print() {
                 </v-data-table>
             </template>
             <template #right-panel>
-                <slot name="right-panel" />
+                <div :class="rightPanelClass as any" :style="rightPanelStyle as any">
+                    <slot name="right-panel" />
+                </div>
             </template>
         </resizeable-splitter>
         <slot name="bottom-area" />

@@ -9,6 +9,7 @@ import type {
 } from './datatable';
 
 type AnyFn = (...args: any[]) => any;
+type CssLike = string | Record<string, any> | Array<string | Record<string, any>>;
 
 interface BaseDatatableProps {
   hideTitleBar?: boolean;
@@ -29,6 +30,13 @@ interface BaseDatatableProps {
   rowHighlightClass?: string;
   headerTextSize?: string;
   headerIconSize?: string;
+  headerCellClass?: CssLike;
+  headerCellStyle?: CssLike;
+  tableClass?: CssLike;
+  tableStyle?: CssLike;
+  rightPanelClass?: CssLike;
+  rightPanelStyle?: CssLike;
+  dataTableProps?: Record<string, any>;
   color?: string;
   itemValue?: string;
   search?: string;
@@ -90,6 +98,12 @@ export interface VDatatablePlusProps extends BaseDatatableProps {
 export interface VDatatableServerPlusProps extends BaseDatatableProps {
   itemsLength?: number;
   itemsPerPage?: number;
+}
+
+export interface ResizeableSplitterProps {
+  isFixed?: boolean;
+  showSplitter?: boolean;
+  splitterPosition?: number;
 }
 
 export interface VDatatablePlusEmits {

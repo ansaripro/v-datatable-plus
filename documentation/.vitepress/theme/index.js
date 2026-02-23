@@ -12,6 +12,7 @@ import './custom.css'
 import DataTableSimple from '../../components/DataTableSimple.vue';
 import DataTableFull from '../../components/DataTableFull.vue';
 import ServerDataTable from '../../components/ServerDataTable.vue';
+import ApiReferenceTable from '../../components/ApiReferenceTable.vue';
 
 const vuetify = createVuetify({
   components,
@@ -44,5 +45,6 @@ export default {
     app.component('DataTableSimple', DataTableSimple);
     app.component('DataTableFull', DataTableFull);
     app.component('ServerDataTable', ServerDataTable);
+    app.component('ApiReferenceTable', ApiReferenceTable);
   }
 };

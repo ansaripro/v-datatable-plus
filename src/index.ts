@@ -27,6 +27,7 @@ export type {
   DataTableHeader,
   ColumnMenuEventPayload,
   RowClickEventPayload,
+  ResizeableSplitterProps,
   VDatatablePlusProps,
   VDatatableServerPlusProps,
   VDatatablePlusEmits,

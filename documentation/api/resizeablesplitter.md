@@ -1,49 +1,42 @@
 <script setup>
-import { ref } from 'vue';
+const propsColumns = [
+  { key: 'name', label: 'Name' },
+  { key: 'type', label: 'Type', code: true },
+  { key: 'default', label: 'Default', code: true },
+  { key: 'detail', label: 'Details' },
+]
 
-// Props
-const propsSearch = ref(null);
-const propsHeaders = ref([
-    { title: 'Name', key: 'name' },
-    { title: 'Type', key: 'type' },
-    { title: 'Default', key: 'default' },
-]);
-const propsItems = ref([
-    {
-        name: 'show-splitter',
-        type: 'boolean',
-        default: false,
-        detail: 'Show splitter between panel for drag.'
-    },
-    {
-        name: 'is-fixed',
-        type: 'boolean',
-        default: false,
-        detail: 'Set true if you want splitter moveable'
-    },
-    {
-        name: 'splitter-position',
-        type: 'number',
-        default: '100',
-        detail: 'Set splitter position in number which will be use as percertage i.e. 20 means 20% from the left.'
-    },
-]);
+const propsRows = [
+  {
+    name: 'show-splitter',
+    type: 'boolean',
+    default: 'false',
+    detail: 'Show splitter and right panel area.',
+  },
+  {
+    name: 'is-fixed',
+    type: 'boolean',
+    default: 'true',
+    detail: 'Disable dragging when true, allow dragging when false.',
+  },
+  {
+    name: 'splitter-position',
+    type: 'number',
+    default: '100',
+    detail: 'Initial splitter position in percent from the left side.',
+  },
+]
 
-// Slots
-const slotsSearch = ref(null);
-const slotsHeaders = ref([
-    { title: 'Name', key: 'name' },
-]);
-const slotsItems = ref([
-    {
-        name: 'right-panel',
-        detail: 'Right panel slot'
-    },
-    {
-        name: 'left-panel',
-        detail: 'Left panel slot'
-    },
-]);
+const slotsColumns = [
+  { key: 'name', label: 'Name' },
+  { key: 'slotProps', label: 'Slot Props', code: true },
+  { key: 'detail', label: 'Details' },
+]
+
+const slotsRows = [
+  { name: 'left-panel', slotProps: '-', detail: 'Left side panel content.' },
+  { name: 'right-panel', slotProps: '-', detail: 'Right side panel content.' },
+]
 </script>
 
 # ResizeableSplitter API
@@ -52,75 +45,7 @@ const slotsItems = ref([
 [ResizeableSplitter](/componentdocs/resizeablesplitter)
 
 ## Props
-::: raw
-<client-only>
-    <div class="vdtp-demo">
-    <v-data-table hide-default-footer
-        :items-per-page="-1"
-        :items-per-page-options="-1"
-        :search="propsSearch"
-        :headers="propsHeaders"
-        :items="propsItems">
-        <template #body.prepend>
-            <tr>
-                <td colspan="3" class="vdtp-theme-bg">
-                    <v-text-field hide-details 
-                        variant="flat"
-                        prepend-inner-icon="search"
-                        placeholder="Search"
-                        v-model="propsSearch"/>
-                </td>
-            </tr>
-        </template>
-        <template #item="{item}">
-            <tr rowspan="2">
-                <td class="font-weight-bold text-blue">{{item.name}}</td>
-                <td class="text-green" v-html="item.type"/>
-                <td>
-                    <span v-if="item.default === true || item.default === false" class="text-purple">{{item.default}}</span>
-                    <span v-else-if="item.default === 'null' || item.default === 'undefined'" class="text-blue">{{item.default}}</span>
-                    <span v-else class="text-green">{{item.default}}</span>
-                </td>
-            </tr>
-            <tr>
-                <td colspan="3">{{item.detail}}</td>
-            </tr>
-        </template>
-    </v-data-table>
-    </div>
-</client-only>
-:::
+<ApiReferenceTable :columns="propsColumns" :rows="propsRows" search-placeholder="Search props" />
 
 ## Slots
-::: raw
-<client-only>
-    <div class="vdtp-demo">
-    <v-data-table hide-default-footer
-        :items-per-page="-1"
-        :items-per-page-options="-1"
-        :search="slotsSearch"
-        :headers="slotsHeaders"
-        :items="slotsItems">
-        <template #body.prepend>
-            <tr>
-                <td colspan="3" class="vdtp-theme-bg">
-                    <v-text-field hide-details 
-                        variant="flat"
-                        prepend-inner-icon="search"
-                        placeholder="Search"
-                        v-model="eventsSearch"/>
-                </td>
-            </tr>
-        </template>
-        <template #item="{item}">
-            <tr rowspan="2">
-                <td class="font-weight-bold text-blue">{{item.name}}</td>
-            </tr>
-            <tr>
-                <td>{{item.detail}}</td>
-            </tr>
-        </template>
-    </v-data-table>
-    </div>
-</client-only>
-:::
+<ApiReferenceTable :columns="slotsColumns" :rows="slotsRows" search-placeholder="Search slots" />
