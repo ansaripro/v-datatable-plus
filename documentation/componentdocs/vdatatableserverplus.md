@@ -7,7 +7,13 @@ import ServerDataTable from '../components/ServerDataTable.vue'
 ## API
 [VDatatableServerPlus](/api/vdatatableserverplus)
 
-## Usage
+## Notes
+
+- Designed for server-side paging/sorting/filtering through `@update:options`.
+- If your app uses Vuetify auto-import/tree-shaking, explicitly register required Vuetify components.
+- Column drag-and-drop in the column menu is native and still emits `columnMenuDragChange`.
+
+## Server-Side Usage
 
 ::: code-group
 ```vue [template]
@@ -251,6 +257,8 @@ const FakeAPI = {
 ## Preview
 ::: raw
 <ClientOnly>
-  <ServerDataTable />
+  <div class="vdtp-demo">
+    <ServerDataTable />
+  </div>
 </ClientOnly>
 :::

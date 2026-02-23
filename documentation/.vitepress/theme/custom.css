@@ -1,0 +1,28 @@
+.vp-doc .vdtp-demo {
+  width: 100%;
+  max-width: 100%;
+  padding: 12px;
+  margin: 12px 0;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 12px;
+  background: var(--vp-c-bg-soft);
+  overflow-x: auto;
+  box-sizing: border-box;
+}
+
+.vp-doc .vdtp-demo > * {
+  width: 100%;
+  min-width: 0;
+}
+
+.vp-doc .vdtp-demo .v-table,
+.vp-doc .vdtp-demo .v-data-table,
+.vp-doc .vdtp-demo .v-datatable-plus,
+.vp-doc .vdtp-demo .v-datatable-server-plus {
+  width: 100%;
+  max-width: 100%;
+}
+
+.vp-doc .vdtp-theme-bg {
+  background-color: rgb(var(--v-theme-surface-variant));
+}

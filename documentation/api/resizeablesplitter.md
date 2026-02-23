@@ -54,6 +54,7 @@ const slotsItems = ref([
 ## Props
 ::: raw
 <client-only>
+    <div class="vdtp-demo">
     <v-data-table hide-default-footer
         :items-per-page="-1"
         :items-per-page-options="-1"
@@ -62,7 +63,7 @@ const slotsItems = ref([
         :items="propsItems">
         <template #body.prepend>
             <tr>
-                <td colspan="3" class="bg-grey-lighten-3">
+                <td colspan="3" class="vdtp-theme-bg">
                     <v-text-field hide-details 
                         variant="flat"
                         prepend-inner-icon="search"
@@ -86,12 +87,14 @@ const slotsItems = ref([
             </tr>
         </template>
     </v-data-table>
+    </div>
 </client-only>
 :::
 
 ## Slots
 ::: raw
 <client-only>
+    <div class="vdtp-demo">
     <v-data-table hide-default-footer
         :items-per-page="-1"
         :items-per-page-options="-1"
@@ -100,7 +103,7 @@ const slotsItems = ref([
         :items="slotsItems">
         <template #body.prepend>
             <tr>
-                <td colspan="3" class="bg-grey-lighten-3">
+                <td colspan="3" class="vdtp-theme-bg">
                     <v-text-field hide-details 
                         variant="flat"
                         prepend-inner-icon="search"
@@ -118,5 +121,6 @@ const slotsItems = ref([
             </tr>
         </template>
     </v-data-table>
+    </div>
 </client-only>
 :::

@@ -1,0 +1,78 @@
+name: Publish package to npm
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - package.json
+      - package-lock.json
+      - src/**
+      - tsconfig.json
+      - tsconfig.build.json
+      - vite.config.mjs
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          registry-url: https://registry.npmjs.org
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate package
+        run: |
+          npm run typecheck
+          npm run build
+
+      - name: Compare local and published versions
+        id: versions
+        shell: bash
+        run: |
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          LOCAL_VERSION=$(node -p "require('./package.json').version")
+          PUBLISHED_VERSION=$(npm view "$PACKAGE_NAME" version 2>/dev/null || true)
+
+          echo "package_name=$PACKAGE_NAME" >> "$GITHUB_OUTPUT"
+          echo "local_version=$LOCAL_VERSION" >> "$GITHUB_OUTPUT"
+          echo "published_version=$PUBLISHED_VERSION" >> "$GITHUB_OUTPUT"
+
+          if [ "$LOCAL_VERSION" = "$PUBLISHED_VERSION" ]; then
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+            echo "No publish needed: $PACKAGE_NAME@$LOCAL_VERSION is already on npm."
+          else
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+            echo "Publishing $PACKAGE_NAME@$LOCAL_VERSION (current npm: ${PUBLISHED_VERSION:-none})."
+          fi
+
+      - name: Publish with npm trusted publishing (OIDC)
+        if: steps.versions.outputs.publish == 'true' && secrets.NPM_TOKEN == ''
+        run: npm publish --access public --provenance
+
+      - name: Publish with NPM_TOKEN (fallback)
+        if: steps.versions.outputs.publish == 'true' && secrets.NPM_TOKEN != ''
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --access public
+
+      - name: Publish summary
+        if: always()
+        run: |
+          echo "Package: ${{ steps.versions.outputs.package_name }}"
+          echo "Local version: ${{ steps.versions.outputs.local_version }}"
+          echo "Published version before run: ${{ steps.versions.outputs.published_version }}"
+          echo "Publish attempted: ${{ steps.versions.outputs.publish }}"

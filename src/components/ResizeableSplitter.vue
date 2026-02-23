@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ref, computed } from 'vue'
 
 const props = defineProps({
@@ -47,7 +47,7 @@ const splitterStyle = computed(() => {
   } else return [{ display: 'none' }];
 });
 
-function handleDragging(ev) {
+function handleDragging(ev: MouseEvent) {
   const percentage = (ev.pageX / window.innerWidth) * 100
 
   if (percentage >= 10 && percentage <= 90) {

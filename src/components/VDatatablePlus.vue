@@ -1,7 +1,8 @@
-<script setup>
-import { ref, reactive, computed, watch, useSlots } from 'vue';
-import { FilterType, FilterMode } from '../types/index';
-import Draggable from 'vuedraggable';
+<script setup lang="ts">
+import { ref, reactive, computed, watch, useSlots, type PropType } from 'vue';
+import { FilterType, FilterMode, type FilterTypeValue } from '../types/index';
+import type { GroupByItem, DataTableHeader, ItemsPerPageOption, RowItem } from '../types/datatable';
+import type { VDatatablePlusProps, VDatatablePlusEmits } from '../types/components';
 import ResizeableSplitter from './ResizeableSplitter.vue';
 
 const props = defineProps({
@@ -111,16 +112,16 @@ const props = defineProps({
         default: true,
     },
     expanded: {
-        type: Array,
-        default: [],
+        type: Array as PropType<any[]>,
+        default: () => [],
     },
     groupBy: {
-        type: Array,
-        default: [],
+        type: Array as PropType<GroupByItem[]>,
+        default: () => [],
     },
     modelValue: {
-        type: Array,
-        default: [],
+        type: Array as PropType<any[]>,
+        default: () => [],
     },
     theme: {
         type:  String,
@@ -157,17 +158,17 @@ const props = defineProps({
         default: false,
     },
     sortBy: {
-        type: Array,
-        default: [],
+        type: Array as PropType<Array<Record<string, any>>>,
+        default: () => [],
     },
     items: {
-        type: Array,
-        default: [],
+        type: Array as PropType<RowItem[]>,
+        default: () => [],
     },
     headers: {
         required: true,
-        type: Array,
-        default: [],
+        type: Array as PropType<DataTableHeader[]>,
+        default: () => [],
     },
     page: {
         type: [String, Number],
@@ -178,8 +179,8 @@ const props = defineProps({
         default: 10,
     },
     itemsPerPageOptions: {
-        type: Array,
-        default: [
+        type: Array as PropType<ItemsPerPageOption[]>,
+        default: () => [
             { value: 10, title: '10' },
             { value: 25, title: '25' },
             { value: 50, title: '50' },
@@ -264,31 +265,15 @@ const props = defineProps({
         type: String,
         default: 'mdi-sort-descending',
     },
-});
+}) as VDatatablePlusProps;
 
-const emit = defineEmits([
-    'update:currentItems',
-    'update:expanded',
-    'update:groupBy',
-    'update:itemsPerPage',
-    'update:modelValue',
-    'update:options',
-    'update:page',
-    'update:sortBy',
-    'update:headers',
-    'update:selectedRow',
-    'click:row',
-    'columnMenuOpened',
-    'columnMenuDragChange',
-    'columnMenuChecked',
-    'columnMenuFixed'
-]);
+const emit = defineEmits<VDatatablePlusEmits>();
 
 // Template refs
-const customDataTable = ref(null);
+const customDataTable = ref<{ headers: DataTableHeader[] } | null>(null);
 
 // Data properties
-const lastSelectedRowNode = ref(null);
+const lastSelectedRowNode = ref<HTMLElement | null>(null);
 const itemsLength = ref(0);
 const filterTypes = reactive([
     { title: 'Contains', value: FilterType.Contains },
@@ -304,6 +289,51 @@ const currentPage = ref(props.page);
 const curentItemPerPage = ref(props.itemsPerPage);
 const currentSortBy = ref(props.sortBy);
 const currentGroupBy = ref(props.groupBy);
+const draggedColumnIndex = ref<number | null>(null);
+
+function toNumber(value: number | string | null | undefined, fallback = 0): number {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function onColumnDragStart($event: DragEvent, index: number, element: DataTableHeader) {
+    if (element.draggable === false) return;
+    draggedColumnIndex.value = index;
+    if ($event.dataTransfer) {
+        $event.dataTransfer.effectAllowed = 'move';
+        $event.dataTransfer.setData('text/plain', String(index));
+    }
+}
+
+function onColumnDragEnd() {
+    draggedColumnIndex.value = null;
+}
+
+function onColumnDrop(targetIndex: number, targetElement: DataTableHeader) {
+    if (targetElement.draggable === false) {
+        draggedColumnIndex.value = null;
+        return;
+    }
+    const sourceIndex = draggedColumnIndex.value;
+    draggedColumnIndex.value = null;
+    if (sourceIndex == null || sourceIndex === targetIndex) return;
+
+    const sourceElement = localHeaders.value[sourceIndex];
+    if (!sourceElement || sourceElement.draggable === false) return;
+
+    const updatedHeaders = [...localHeaders.value];
+    const [movedElement] = updatedHeaders.splice(sourceIndex, 1);
+    if (!movedElement) return;
+    updatedHeaders.splice(targetIndex, 0, movedElement);
+    localHeaders.value = updatedHeaders;
+    emit('columnMenuDragChange', {
+        moved: {
+            element: movedElement,
+            oldIndex: sourceIndex,
+            newIndex: targetIndex,
+        },
+    });
+}
 
 
 // Computed
@@ -376,20 +406,23 @@ const localHeaders = computed({
     }
 });
 const tableHeaders = computed(() => {
-    return localHeaders.value.filter(x => x.isShow);
+    return localHeaders.value.filter((x: DataTableHeader) => x.isShow);
 });
 const pages = computed(() => {
     let pages = 1;
-    if (dtItemsPerPage.value == null || itemsLength.value <= 0) return pages;
-    pages = Math.ceil(itemsLength.value / dtItemsPerPage.value);
+    const itemPerPage = toNumber(dtItemsPerPage.value, 0);
+    if (itemPerPage <= 0 || itemsLength.value <= 0) return pages;
+    pages = Math.ceil(itemsLength.value / itemPerPage);
     return pages > 0 ? pages : 1;
 });
 const pageDetail = computed(() => {
+    const itemPerPage = toNumber(dtItemsPerPage.value, 0);
+    const page = toNumber(dtPage.value, 1);
     if (itemsLength.value <= 0) return `${itemsLength.value} items`;
-    if (dtItemsPerPage.value <= 0 || dtItemsPerPage.value > itemsLength.value) return `1 - ${itemsLength.value} items`;
+    if (itemPerPage <= 0 || itemPerPage > itemsLength.value) return `1 - ${itemsLength.value} items`;
 
-    const startPage = (dtPage.value - 1) * dtItemsPerPage.value + 1;
-    let endPage = dtPage.value * dtItemsPerPage.value;
+    const startPage = (page - 1) * itemPerPage + 1;
+    let endPage = page * itemPerPage;
     if (endPage > itemsLength.value) endPage = itemsLength.value;
     return `${startPage} - ${endPage} of ${itemsLength.value} items`;
 });
@@ -401,7 +434,7 @@ const filteredItems = computed(() => {
     ) {
         list = props.items.filter((o) => {
             let flag = true;
-            customDataTable.value.headers.forEach((c) => {
+            customDataTable.value.headers.forEach((c: DataTableHeader) => {
                 if (flag) {
                     const value = typeof c.value === 'function' ? c.value(o) : o[c.key];
                     
@@ -443,10 +476,10 @@ watch(() => props.groupBy, (newValue) => {
 }, { deep: true });
 
 // methods
-function getHeaders(columns) {
+function getHeaders(columns: any[] | undefined) {
     if (columns && columns.length > 0) {
-        return columns.map((c) => {
-            const h = localHeaders.value.find(x => x.key === c.key);
+        return columns.map((c: any) => {
+            const h = localHeaders.value.find((x: any) => x.key === c.key);
             if (h) {
                 h.align = c.align;
                 h.width = c.width;
@@ -461,8 +494,8 @@ function getHeaders(columns) {
     }
     return columns;
 }
-function getHeaderProps(props, column) {
-    let hProps = {...props, column: column};
+function getHeaderProps(props: Record<string, any>, column: any) {
+    const hProps: Record<string, any> = { ...props, column: column };
     delete hProps.headers;
     delete hProps.columns;
     return hProps;
@@ -470,53 +503,54 @@ function getHeaderProps(props, column) {
 function onChangeItemPerPage() {
     dtPage.value = 1
 }
-function checkIsSortable(column) {
+function checkIsSortable(column: any) {
     return column.sortable && !(column.children && column.children.length > 0);
 }
-function checkIsGroupable(column) {
+function checkIsGroupable(column: any) {
     return column.groupable === true && !(column.children && column.children.length > 0);
 }
-function getSelectAllIcon(props) {
+function getSelectAllIcon(props: Record<string, any>) {
     if (props.allSelected && props.someSelected) return '$checkboxOn';
     else if (props.someSelected && !props.allSelected) return '$checkboxIndeterminate';
     return '$checkboxOff';
 }
-function onSelectAll(props) {
+function onSelectAll(props: Record<string, any>) {
     if (props.allSelected && props.someSelected) props.selectAll(false);
     else props.selectAll(true);
 }
-function onGroupBy(key) {
-    const groupByColumn = dtGroupBy.value || [];
+function onGroupBy(key: string) {
+    const groupByColumn = (dtGroupBy.value || []) as GroupByItem[];
     if (groupByColumn.findIndex((g) => g.key === key) === -1) {
         groupByColumn.push({ key: key, order: 'asc' });
         dtGroupBy.value = groupByColumn;
     }
 }
-function onRemoveGroupBy(key) {
-    const groupByColumn = dtGroupBy.value || [];
+function onRemoveGroupBy(key: string) {
+    const groupByColumn = (dtGroupBy.value || []) as GroupByItem[];
     const indx = groupByColumn.findIndex((g) => g.key === key);
     if (indx !== -1) {
         groupByColumn.splice(indx, 1);
         dtGroupBy.value = groupByColumn;
     }
 }
-function sortByGroup(key) {
-    const groupByColumn = dtGroupBy.value;
+function sortByGroup(key: string) {
+    const groupByColumn = dtGroupBy.value as GroupByItem[];
     const obj = groupByColumn?.find((g) => g.key === key);
+    if (!obj) return;
     obj.order = obj.order === 'asc' ? 'desc' : 'asc';
     dtGroupBy.value = groupByColumn;
 }
-function getGroupSortIcon(key) {
-    const obj = dtGroupBy.value?.find((g) => g.key === key);
+function getGroupSortIcon(key: string) {
+    const obj = (dtGroupBy.value as GroupByItem[] | undefined)?.find((g) => g.key === key);
     if (obj) return obj.order === 'asc' ? props.groupSortAscIcon : props.groupSortDescIcon;
     else return props.groupSortAscIcon;
 }
-function checkIsGroupBy(key) {
-    return dtGroupBy.value?.findIndex((g) => g.key === key) !== -1;
+function checkIsGroupBy(key: string) {
+    return (dtGroupBy.value as GroupByItem[] | undefined)?.findIndex((g) => g.key === key) !== -1;
 }
-function groupHeaderDisplayText(gr, columns) {
+function groupHeaderDisplayText(gr: Record<string, any>, columns: any[]) {
     let text = '';
-    const column = columns.find((x) => x.key === gr.key);
+    const column = columns.find((x: any) => x.key === gr.key);
     if (column) {
         const val = typeof column.value === 'function' ? column.value({[gr.key]: gr.value}) : gr.value;
         text = `${column.title}: ${val}`;
@@ -524,15 +558,15 @@ function groupHeaderDisplayText(gr, columns) {
     text = `${text} (Count: ${gr.items.length})`;
     return text;
 }
-function getGroupProps(props) {
+function getGroupProps(props: Record<string, any>) {
     return {...props, onRemoveGroupBy: onRemoveGroupBy};
 }
-function headerStyle(column) {
-    const obj = {};
+function headerStyle(column: any) {
+    const obj: Record<string, string | number> = {};
     if (column) {
         obj['textAlign'] = column.align;
         const width = column.width;
-        if (width > 0 || (typeof width === 'string' && width.length > 0)) {
+        if ((typeof width === 'number' && width > 0) || (typeof width === 'string' && width.length > 0)) {
             obj['width'] = `${width}px`;
             obj['minWidth'] = `${width}px`;
         }
@@ -544,13 +578,13 @@ function headerStyle(column) {
     }
     return obj;
 }
-function updateCurrentItems(obj) {
+function updateCurrentItems(obj: any) {
     emit('update:currentItems', obj);
 }
-function updateOptions(obj) {
+function updateOptions(obj: any) {
     emit('update:options', obj);
 }
-function rowClick($event, param) {
+function rowClick($event: any, param: any) {
     if (props.highlightRow) {
         if (props.rowHighlightClass) lastSelectedRowNode.value?.classList.remove(props.rowHighlightClass);
         // Click same row again
@@ -572,7 +606,7 @@ function rowClick($event, param) {
     if (props.itemValue?.length > 0) localSelectedRow.value = param.item?.[props.itemValue] ?? null;
     emit('click:row', { $event, param });
 }
-function matchFilter(type, value, searchVal) {
+function matchFilter(type: FilterTypeValue | string, value: any, searchVal: any) {
     let flag = true;
     if (!searchVal) return flag;
 
@@ -681,34 +715,39 @@ function print() {
                     <v-btn size="small" :color="color" :icon="dragMenuIcon" v-bind="props" />
                 </template>
                 <v-list density="compact" lines="one" :theme="theme" :max-height="dragMenuHeight">
-                    <Draggable
-                        item-key="key"
-                        handle=".cursor-move"
-                        v-model="localHeaders"
-                        @change="$emit('columnMenuDragChange', $event)">
-                        <template #item="{ element }">
-                            <v-list-item density="compact">
-                                <template #prepend>
-                                    <v-list-item-action start>
-                                        <v-checkbox-btn density="compact"
-                                            :color="color"
-                                            v-model="element.isShow"
-                                            @change="$emit('columnMenuChecked', { element, $event })" />
-                                    </v-list-item-action>
-                                </template>
-                                {{ element.title }}
-                                <template #append>
-                                    <v-checkbox-btn density="compact" v-if="element.fixable"
-                                        :true-icon="dragItemFreezeIcon"
-                                        :false-icon="dragItemUnFreezeIcon"
-                                        :color="color"
-                                        v-model="element.fixed"
-                                        @change="$emit('columnMenuFixed', { element, $event })" />
-                                    <v-icon size="small" density="compact" class="cursor-move" :icon="dragItemIcon" v-if="element.draggable !== false" />
-                                </template>
-                            </v-list-item>
+                    <v-list-item
+                        v-for="(element, index) in localHeaders"
+                        :key="element.key"
+                        density="compact"
+                        @dragenter.prevent
+                        @dragover.prevent
+                        @drop.prevent="onColumnDrop(index, element)">
+                        <template #prepend>
+                            <v-list-item-action start>
+                                <v-checkbox-btn density="compact"
+                                    :color="color"
+                                    v-model="element.isShow"
+                                    @change="$emit('columnMenuChecked', { element, $event })" />
+                            </v-list-item-action>
                         </template>
-                    </Draggable>
+                        {{ element.title }}
+                        <template #append>
+                            <v-checkbox-btn density="compact" v-if="element.fixable"
+                                :true-icon="dragItemFreezeIcon"
+                                :false-icon="dragItemUnFreezeIcon"
+                                :color="color"
+                                v-model="element.fixed"
+                                @change="$emit('columnMenuFixed', { element, $event })" />
+                            <v-icon size="small"
+                                density="compact"
+                                class="cursor-move"
+                                :icon="dragItemIcon"
+                                v-if="element.draggable !== false"
+                                draggable="true"
+                                @dragstart="onColumnDragStart($event, index, element)"
+                                @dragend="onColumnDragEnd" />
+                        </template>
+                    </v-list-item>
                 </v-list>
             </v-menu>
             <v-toolbar-title>
@@ -724,13 +763,13 @@ function print() {
             <template #left-panel>
                 <v-data-table fixed-header ref="customDataTable" class="border-s"
                     :height="tableHeight"
-                    :density="density"
+                    :density="density as any"
                     :sticky="sticky"
                     :theme="theme"
                     :color="color"
                     :hover="hover"
                     :mobile="mobile"
-                    :mobile-breakpoint="mobileBreakpoint"
+                    :mobile-breakpoint="mobileBreakpoint as any"
                     :loading="loading"
                     :loading-text="loadingText"
                     :hide-no-data="hideNoData"
@@ -741,28 +780,28 @@ function print() {
                     :cell-props="cellProps"
                     :show-expand="showExpand"
                     :show-select="showSelect"
-                    :headers="tableHeaders"
+                    :headers="tableHeaders as any"
                     :items="filteredItems"
-                    :select-strategy="selectStrategy"
-                    :item-selectable="itemSelectable"
+                    :select-strategy="selectStrategy as any"
+                    :item-selectable="itemSelectable as any"
                     :item-value="itemValue"
                     :return-object="returnObject"
-                    :custom-key-sort="customKeySort"
+                    :custom-key-sort="customKeySort as any"
                     :disable-sort="disableSort"
                     :multi-sort="multiSort"
                     :must-sort="mustSort"
                     :expand-on-click="expandOnClick"
-                    :custom-filter="customFilter"
-                    :custom-key-filter="customKeyFilter"
-                    :filter-keys="filterKeys"
-                    :filter-mode="filterMode"
-                    :value-comparator="valueComparator"
+                    :custom-filter="customFilter as any"
+                    :custom-key-filter="customKeyFilter as any"
+                    :filter-keys="filterKeys as any"
+                    :filter-mode="filterMode as any"
+                    :value-comparator="valueComparator as any"
                     :search="search"
                     v-model="dtModel"
-                    v-model:page="dtPage"
-                    v-model:items-per-page="dtItemsPerPage"
-                    v-model:sort-by="dtSortBy"
-                    v-model:group-by="dtGroupBy"
+                    v-model:page="dtPage as any"
+                    v-model:items-per-page="dtItemsPerPage as any"
+                    v-model:sort-by="dtSortBy as any"
+                    v-model:group-by="dtGroupBy as any"
                     v-model:expanded="dtExpanded"
                     @click:row="rowClick"
                     @update:currentItems="updateCurrentItems"
@@ -823,7 +862,7 @@ function print() {
                             <template v-for="(header, hIndex) in props.headers" :key="hIndex">
                                 <tr>
                                     <template v-for="column in header" :key="column.key">
-                                        <th class="bg-grey-lighten-4 border-s"
+                                        <th class="vdtp-header-cell border-s"
                                             :style="[headerStyle(column)]"
                                             :rowspan="column.rowspan" :colspan="column.colspan">
                                             <slot :name="`header.${column.key}`" v-bind="getHeaderProps(props, column)">
@@ -860,7 +899,7 @@ function print() {
                         </slot>
                         <tr v-if="!hideFilterRow">
                             <th v-for="(column, index) in getHeaders(props.columns)"
-                                class="bg-grey-lighten-4 border-s"
+                                class="vdtp-header-cell border-s"
                                 :style="[headerStyle(column)]"
                                 :key="index">
                                 <template v-if="column.filterable !== false">
@@ -953,7 +992,7 @@ function print() {
                                     :last-icon="lastIcon"
                                     :next-icon="nextIcon"
                                     :prev-icon="prevIcon"
-                                    v-model="dtPage"
+                                    v-model="dtPage as any"
                                     :length="pages"/>
                                 <v-spacer />
                                 <span class="pr-2">{{ pageDetail }}</span>

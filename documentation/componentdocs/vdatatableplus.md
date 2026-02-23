@@ -8,7 +8,13 @@ import DataTableFull from '../components/DataTableFull.vue'
 ## API
 [VDatatablePlus](/api/vdatatableplus)
 
-## Simple Usage
+## Notes
+
+- This component uses native column drag-and-drop (no `vuedraggable` dependency).
+- If your app uses Vuetify auto-import/tree-shaking, make sure required Vuetify components are explicitly registered.
+- Drag event payload remains compatible via `columnMenuDragChange` with `{ moved: { element, oldIndex, newIndex } }`.
+
+## Basic Usage
 
 ::: code-group
 ```vue  [template]
@@ -137,16 +143,18 @@ const items = ref([
 ```
 :::
 
-## Simple Preview
+## Basic Preview
 ::: raw
 <ClientOnly>
-  <DataTableSimple />
+  <div class="vdtp-demo">
+    <DataTableSimple />
+  </div>
 </ClientOnly>
 :::
 
 
 
-## All Features Usage
+## Full Features Usage
 
 ::: code-group
 ```vue [template]
@@ -347,9 +355,11 @@ onMounted(() => {
 ```
 :::
 
-## All Features Preview
+## Full Features Preview
 ::: raw
 <ClientOnly>
-  <DataTableFull />
+  <div class="vdtp-demo">
+    <DataTableFull />
+  </div>
 </ClientOnly>
 :::

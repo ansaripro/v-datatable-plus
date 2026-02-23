@@ -209,7 +209,7 @@ const eventsItems = ref([
     {
         name: 'columnMenuDragChange',
         type: '[any]',
-        detail: 'VueDraggable drag change event.'
+        detail: 'Column drag change event. Payload: { moved: { element, oldIndex, newIndex } }'
     },
     {
         name: 'columnMenuChecked',
@@ -273,6 +273,7 @@ Note: height prop replace with table-height prop.
 ## Props
 ::: raw
 <client-only>
+    <div class="vdtp-demo">
     <v-data-table hide-default-footer
         :items-per-page="-1"
         :items-per-page-options="-1"
@@ -281,7 +282,7 @@ Note: height prop replace with table-height prop.
         :items="propsItems">
         <template #body.prepend>
             <tr>
-                <td colspan="3" class="bg-grey-lighten-3">
+                <td colspan="3" class="vdtp-theme-bg">
                     <v-text-field hide-details 
                         variant="flat"
                         prepend-inner-icon="search"
@@ -305,12 +306,14 @@ Note: height prop replace with table-height prop.
             </tr>
         </template>
     </v-data-table>
+    </div>
 </client-only>
 :::
 
 ## Events
 ::: raw
 <client-only>
+    <div class="vdtp-demo">
     <v-data-table hide-default-footer
         :items-per-page="-1"
         :items-per-page-options="-1"
@@ -319,7 +322,7 @@ Note: height prop replace with table-height prop.
         :items="eventsItems">
         <template #body.prepend>
             <tr>
-                <td colspan="3" class="bg-grey-lighten-3">
+                <td colspan="3" class="vdtp-theme-bg">
                     <v-text-field hide-details 
                         variant="flat"
                         prepend-inner-icon="search"
@@ -338,12 +341,14 @@ Note: height prop replace with table-height prop.
             </tr>
         </template>
     </v-data-table>
+    </div>
 </client-only>
 :::
 
 ## Slots
 ::: raw
 <client-only>
+    <div class="vdtp-demo">
     <v-data-table hide-default-footer
         :items-per-page="-1"
         :items-per-page-options="-1"
@@ -352,7 +357,7 @@ Note: height prop replace with table-height prop.
         :items="slotsItems">
         <template #body.prepend>
             <tr>
-                <td colspan="3" class="bg-grey-lighten-3">
+                <td colspan="3" class="vdtp-theme-bg">
                     <v-text-field hide-details 
                         variant="flat"
                         prepend-inner-icon="search"
@@ -375,5 +380,6 @@ Note: height prop replace with table-height prop.
             </tr>
         </template>
     </v-data-table>
+    </div>
 </client-only>
 :::

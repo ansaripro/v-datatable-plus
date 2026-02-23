@@ -19,7 +19,7 @@ export default defineConfig({
   },
   build: {
     lib: {
-      entry: resolve(__dirname, "src/index.js"),
+      entry: resolve(__dirname, "src/index.ts"),
       name: "v-datatable-plus",
       fileName: "v-datatable-plus",
       formats: ["es", "cjs", "umd"],
@@ -27,14 +27,13 @@ export default defineConfig({
     rollupOptions: {
       // make sure to externalize deps that shouldn't be bundled
       // into your library
-      external: ["vue", "vuetify", "vuedraggable"],
+      external: ["vue", "vuetify"],
       output: {
         // Provide global variables to use in the UMD build
         // for externalized deps
         exports: "named",
         globals: {
           vue: "Vue",
-          vuedraggable: "Vuedraggable",
           vuetify: "Vuetify"
         },
       },

@@ -1,10 +1,35 @@
 # Introduction
 
-VDatatablePlus is a an wrapper component for Vuetify VDataTable and VDataTableServer component, it gives you Header row filter functionlity like other advance data tables. It also utlilize VueDraggable Vue 3 library for columns drag n drop and show/hide functiionality.
-<br/>
-It also have other feature due to modification of based VDataTable/VDataTableServer components so you you can utilized them as per your need.  
-<br/><br/>
-This repository also expose a ResizeableSplitter component which is useful for split horizontal contents with or without user interaction.
+`v-datatable-plus` provides enhanced wrappers for Vuetify `VDataTable` and `VDataTableServer`.
+
+### Highlights
+
+- Header row filtering (type/selection filter modes)
+- Column show/hide and freeze/unfreeze controls
+- Native column drag-and-drop reordering (no external drag library)
+- Right panel layout with `ResizeableSplitter`
+- Compatible with both JavaScript and TypeScript projects
+
+### Dependencies
+
+- Vue 3
+- Vuetify 3
+
+No extra dependency is required for column drag behavior.
+
+### Migration Notes (TypeScript + Native Drag)
+
+- Internal source is now TypeScript-based.
+- `vuedraggable` has been removed and replaced with native drag-and-drop.
+- Component names and primary events remain the same (`VDatatablePlus`, `VDatatableServerPlus`).
+
+### Breaking Changes
+
+- If your project explicitly installed `vuedraggable` only for this package, it is no longer required.
+- If your project depended on `vuedraggable` internals (for example, importing or typing against `vuedraggable`-specific structures directly from your own code), update that code to rely on this package events/props instead.
+- If you used non-public deep imports from this package internals, switch to public exports from `v-datatable-plus`.
+
+For step-by-step upgrade instructions, see [Getting Started](/getting-started).
 
 
 ## License

@@ -30,6 +30,8 @@ Hover on Vertical line and move it to left or right.
 
 ::: raw
 <client-only>
-    <resizeable-splitter/>
+    <div class="vdtp-demo">
+        <resizeable-splitter/>
+    </div>
 </client-only>
 :::

@@ -1,12 +1,62 @@
 # Getting Started
 
+> [!IMPORTANT]
+> Upgrading from an older version?
+> Check the [Migration Guide](/migration) first for TypeScript migration notes, `vuedraggable` removal details, and breaking-change checklist.
+
 ## Pre-Requisite / Dependencies
 
 [Vue 3](https://vuejs.org/)<br/>
-[Vuetify V3](https://vuetifyjs.com/en/) version 3.6.7 or latest<br/>
-[Vuedraggable](https://github.com/SortableJS/vue.draggable.next) version 4.1.0 or latest (vuedraggable@next)<br/>
+[Vuetify V3](https://vuetifyjs.com/en/)<br/>
 
-Required Vuetify components for VDatatablePlus and VDatatableServerPlus [Vuetify Autoimport](#vuetify-autoimport) 
+Required Vuetify components for VDatatablePlus and VDatatableServerPlus [Vuetify Autoimport](#vuetify-autoimport)
+
+## Notes on Latest Changes
+
+- Column drag-and-drop is now built in.
+- `vuedraggable` is no longer required.
+- Public events such as `columnMenuDragChange` are still available.
+
+## Migration Guide (from older versions)
+
+Use this checklist when upgrading existing projects:
+
+1. Update package:
+
+```bash
+npm install v-datatable-plus@latest
+```
+
+2. Remove unused drag dependency (if it was only used for this package):
+
+```bash
+npm uninstall vuedraggable
+```
+
+3. Keep using the same component names:
+
+- `VDatatablePlus`
+- `VDatatableServerPlus`
+- `ResizeableSplitter`
+
+4. Keep using the same public events, including:
+
+- `columnMenuDragChange`
+- `columnMenuChecked`
+- `columnMenuFixed`
+
+`columnMenuDragChange` emits drag movement details in `moved` (`element`, `oldIndex`, `newIndex`).
+
+## Breaking Changes
+
+- `vuedraggable` is not a dependency anymore.
+- Projects that directly used `vuedraggable`-specific internals just for this package should migrate to this package's public props/events.
+- Deep internal imports are not guaranteed; use package public exports from `v-datatable-plus`.
+
+## Non-Breaking Changes
+
+- JavaScript usage remains the same.
+- TypeScript users get improved type support from package exports.
 
 ## Installation
 
@@ -69,6 +119,7 @@ app.mount('#app');
 </template>
 
 <script setup>
+import { ref } from 'vue'
 import 'v-datatable-plus/dist/style.css'
 import { VDatatablePlus, FilterType, FilterMode } from  'v-datatable-plus';
 
@@ -82,9 +133,12 @@ const items = ref([
 ```
 
 ## Vuetify Autoimport
-If you are using vuetify autoimport then you will need to import those below components manually which you are not using in your application.
+If your app uses Vuetify auto-import/tree-shaking, components inside external packages are not always detected automatically.
+
+For this library, register the required Vuetify components explicitly in your Vuetify setup.
 
 ```js
+import { createVuetify } from 'vuetify'
 import {
     VDataTable,
     VDataTableServer,
@@ -103,8 +157,30 @@ import {
     VSpacer,
     VTextField,
 } from 'vuetify/components';
+
+export default createVuetify({
+    components: {
+        VDataTable,
+        VDataTableServer,
+        VToolbar,
+        VToolbarTitle,
+        VSelect,
+        VList,
+        VListItem,
+        VListItemAction,
+        VMenu,
+        VBtn,
+        VCard,
+        VIcon,
+        VCheckboxBtn,
+        VPagination,
+        VSpacer,
+        VTextField,
+    },
+})
 ```
-For example import only VDataTable in App.vue in case of using v-datatable-plus component and other required vuetify components already in utlized in the application.
+
+You can register only the subset used by your app and selected `v-datatable-plus` components.
 
 ::: code-group
 ```vue [App.vue]
