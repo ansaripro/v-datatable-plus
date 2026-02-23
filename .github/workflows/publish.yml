@@ -23,9 +23,9 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22       # Node 22 LTS ships npm 10.9+ which supports OIDC publish auth
           cache: npm
-          registry-url: https://registry.npmjs.org   # Creates .npmrc — required for OIDC auth
+          registry-url: https://registry.npmjs.org
 
       - run: npm ci
 
