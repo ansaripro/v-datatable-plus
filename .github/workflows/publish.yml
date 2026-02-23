@@ -59,15 +59,9 @@ jobs:
             echo "Publishing $PACKAGE_NAME@$LOCAL_VERSION (current npm: ${PUBLISHED_VERSION:-none})."
           fi
 
-      - name: Publish with npm trusted publishing (OIDC)
-        if: steps.versions.outputs.publish == 'true' && secrets.NPM_TOKEN == ''
+      - name: Publish package (trusted publishing)
+        if: steps.versions.outputs.publish == 'true'
         run: npm publish --access public --provenance
-
-      - name: Publish with NPM_TOKEN (fallback)
-        if: steps.versions.outputs.publish == 'true' && secrets.NPM_TOKEN != ''
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --access public
 
       - name: Publish summary
         if: always()
