@@ -19,7 +19,8 @@ const headers = ref([
     isShow: true,
     key: 'speed',
     title: 'Speed (knots)',
-    filterType: FilterType.Contains,
+    filterType: FilterType.IsEqualTo,
+    filterMode: FilterMode.Number,
     fixable: true,
     groupable: true
   },
@@ -27,13 +28,15 @@ const headers = ref([
     isShow: true,
     key: 'length',
     title: 'Length (m)',
-    filterType: FilterType.Contains,
+    filterType: FilterType.IsEqualTo,
+    filterMode: FilterMode.Number,
   },
   { 
     isShow: true,
     key: 'price',
     title: 'Price ($)',
-    filterType: FilterType.Contains,
+    filterType: FilterType.IsEqualTo,
+    filterMode: FilterMode.Number,
   },
   {
     isShow: true,

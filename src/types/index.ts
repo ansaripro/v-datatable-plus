@@ -5,11 +5,17 @@ export const FilterType = {
   Contains: 'contains',
   NotContains: 'notcontains',
   EndWith: 'ends',
+  GreaterThan: 'gt',
+  LessThan: 'lt',
+  GreaterThanOrEqual: 'gte',
+  LessThanOrEqual: 'lte',
 } as const;
 
 export const FilterMode = {
   Selection: 'selection',
-  Types: 'types',
+  String: 'string',
+  Number: 'number',
+  DateTime: 'datetime',
 } as const;
 
 export type FilterTypeValue = (typeof FilterType)[keyof typeof FilterType];

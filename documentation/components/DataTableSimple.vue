@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue'
-import { FilterType } from 'v-datatable-plus'
+import { FilterType, FilterMode } from 'v-datatable-plus'
 
 const headers = ref([
   {
@@ -14,20 +14,23 @@ const headers = ref([
     isShow: true,
     key: 'speed',
     title: 'Speed (knots)',
-    filterType: FilterType.Contains,
+    filterType: FilterType.IsEqualTo,
+    filterMode: FilterMode.Number,
     groupable: true
   },
   {
     isShow: true,
     key: 'length',
     title: 'Length (m)',
-    filterType: FilterType.Contains,
+    filterType: FilterType.IsEqualTo,
+    filterMode: FilterMode.Number,
   },
   { 
     isShow: true,
     key: 'price',
     title: 'Price ($)',
-    filterType: FilterType.Contains,
+    filterType: FilterType.IsEqualTo,
+    filterMode: FilterMode.Number,
   },
   {
     isShow: true,

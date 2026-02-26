@@ -311,6 +311,48 @@ const filterTypes = reactive([
     { title: 'Starts with', value: FilterType.StartWith },
     { title: 'Ends with', value: FilterType.EndWith },
 ]);
+const numericFilterTypes = reactive([
+    { title: 'Is equal to', value: FilterType.IsEqualTo },
+    { title: 'Is not equal to', value: FilterType.IsNotEqualTo },
+    { title: 'Greater than', value: FilterType.GreaterThan },
+    { title: 'Less than', value: FilterType.LessThan },
+    { title: 'Greater than or equal', value: FilterType.GreaterThanOrEqual },
+    { title: 'Less than or equal', value: FilterType.LessThanOrEqual },
+]);
+
+function detectColumnType(column: DataTableHeader): string {
+    if (column.filterMode === FilterMode.Selection
+        || column.filterMode === FilterMode.String
+        || column.filterMode === FilterMode.Number
+        || column.filterMode === FilterMode.DateTime) {
+        return column.filterMode;
+    }
+    // Auto-detect from items data
+    if (props.items?.length > 0) {
+        for (const item of props.items) {
+            const value = typeof column.value === 'function' ? column.value(item) : item[column.key];
+            if (value != null) {
+                if (value instanceof Date) return FilterMode.DateTime;
+                if (typeof value === 'number') return FilterMode.Number;
+                // Check if string is a date
+                if (typeof value === 'string') {
+                    const dateTest = Date.parse(value);
+                    if (!isNaN(dateTest) && /^\d{4}-\d{2}-\d{2}/.test(value)) return FilterMode.DateTime;
+                }
+                return FilterMode.String;
+            }
+        }
+    }
+    return FilterMode.String;
+}
+
+function getFilterTypesForColumn(column: DataTableHeader) {
+    const colType = detectColumnType(column);
+    if (colType === FilterMode.Number || colType === FilterMode.DateTime) {
+        return numericFilterTypes;
+    }
+    return filterTypes;
+}
 // Helper Properties
 const slots = useSlots();
 const currentPage = ref(props.page);
@@ -667,6 +709,18 @@ function matchFilter(type: FilterTypeValue | string, value: any, searchVal: any)
                     .toLowerCase()
                     .includes(String(searchVal).toLowerCase());
             break;
+        case FilterType.GreaterThan:
+            flag = value != null && searchVal != null && Number(value) > Number(searchVal);
+            break;
+        case FilterType.LessThan:
+            flag = value != null && searchVal != null && Number(value) < Number(searchVal);
+            break;
+        case FilterType.GreaterThanOrEqual:
+            flag = value != null && searchVal != null && Number(value) >= Number(searchVal);
+            break;
+        case FilterType.LessThanOrEqual:
+            flag = value != null && searchVal != null && Number(value) <= Number(searchVal);
+            break;
         case FilterType.Contains:
         default:
             flag = value
@@ -965,7 +1019,7 @@ function print() {
                                                         v-bind="props"/>
                                                 </template>
                                                 <v-list density="compact" :lines="false" :color="color" :theme="theme">
-                                                    <v-list-item v-for="filter in filterTypes" :key="filter.value"
+                                                    <v-list-item v-for="filter in getFilterTypesForColumn(column)" :key="filter.value"
                                                         :title="filter.title"
                                                         :active="column.filterType === filter.value"
                                                         @click="column.filterType = filter.value" />

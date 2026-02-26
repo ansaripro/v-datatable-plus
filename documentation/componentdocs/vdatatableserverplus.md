@@ -39,7 +39,7 @@ import ServerDataTable from '../components/ServerDataTable.vue'
 <script setup>
 import 'v-datatable-plus/dist/style.css'
 import { ref } from 'vue'
-import { VDatatableServerPlus, FilterType } from 'v-datatable-plus'
+import { VDatatableServerPlus, FilterType, FilterMode } from 'v-datatable-plus'
 
 const headers = ref([
   {
@@ -55,25 +55,29 @@ const headers = ref([
     isShow: true,
     title: 'Calories',
     key: 'calories',
-    filterType: FilterType.Contains,
+    filterType: FilterType.IsEqualTo,
+    filterMode: FilterMode.Number,
   },
   {
     isShow: true,
     title: 'Fat (g)',
     key: 'fat',
-    filterType: FilterType.Contains,
+    filterType: FilterType.IsEqualTo,
+    filterMode: FilterMode.Number,
   },
   { 
     isShow: true,
     title: 'Carbs (g)',
     key: 'carbs',
-    filterType: FilterType.Contains,
+    filterType: FilterType.IsEqualTo,
+    filterMode: FilterMode.Number,
   },
   {
     isShow: true,
     title: 'Protein (g)',
     key: 'protein',
-    filterType: FilterType.Contains,
+    filterType: FilterType.IsEqualTo,
+    filterMode: FilterMode.Number,
   },
   {
     isShow: true,
@@ -212,6 +216,18 @@ function matchFilter(type, value, searchVal) {
                 && !String(value)
                     .toLowerCase()
                     .includes(String(searchVal).toLowerCase());
+            break;
+        case FilterType.GreaterThan:
+            flag = value != null && searchVal != null && Number(value) > Number(searchVal);
+            break;
+        case FilterType.LessThan:
+            flag = value != null && searchVal != null && Number(value) < Number(searchVal);
+            break;
+        case FilterType.GreaterThanOrEqual:
+            flag = value != null && searchVal != null && Number(value) >= Number(searchVal);
+            break;
+        case FilterType.LessThanOrEqual:
+            flag = value != null && searchVal != null && Number(value) <= Number(searchVal);
             break;
         case FilterType.Contains:
         default:

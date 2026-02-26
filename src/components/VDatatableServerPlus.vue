@@ -309,6 +309,21 @@ const filterTypes = reactive([
     { title: 'Starts with', value: FilterType.StartWith },
     { title: 'Ends with', value: FilterType.EndWith },
 ]);
+const numericFilterTypes = reactive([
+    { title: 'Is equal to', value: FilterType.IsEqualTo },
+    { title: 'Is not equal to', value: FilterType.IsNotEqualTo },
+    { title: 'Greater than', value: FilterType.GreaterThan },
+    { title: 'Less than', value: FilterType.LessThan },
+    { title: 'Greater than or equal', value: FilterType.GreaterThanOrEqual },
+    { title: 'Less than or equal', value: FilterType.LessThanOrEqual },
+]);
+
+function getFilterTypesForColumn(column: DataTableHeader) {
+    if (column.filterMode === FilterMode.Number || column.filterMode === FilterMode.DateTime) {
+        return numericFilterTypes;
+    }
+    return filterTypes;
+}
 // Helper Properties
 const slots = useSlots();
 const currentPage = ref(props.page);
@@ -868,7 +883,7 @@ function rowClick($event: any, param: any) {
                                                         v-bind="props"/>
                                                 </template>
                                                 <v-list density="compact" :lines="false" :color="color" :theme="theme">
-                                                    <v-list-item v-for="filter in filterTypes" :key="filter.value"
+                                                    <v-list-item v-for="filter in getFilterTypesForColumn(column)" :key="filter.value"
                                                         :title="filter.title"
                                                         :active="column.filterType === filter.value"
                                                         @click="onFilterTypeClick(column, filter)"/>

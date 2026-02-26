@@ -196,6 +196,48 @@ import { VDataTable } from 'vuetify/components';
 
 
 ## FilterType
+
+### String Filter Types
+Used for text/string columns (default when `filterMode` is `'string'` or auto-detected as string).
+::: raw
+<v-table>
+    <thead>
+        <tr>
+            <th>Types</th>
+            <th>String Value</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Contains</td>
+            <td>'contains'</td>
+        </tr>
+        <tr>
+            <td>NotContains</td>
+            <td>'notcontains'</td>
+        </tr>
+        <tr>
+            <td>IsEqualTo</td>
+            <td>'eq'</td>
+        </tr>
+        <tr>
+            <td>IsNotEqualTo</td>
+            <td>'neq'</td>
+        </tr>
+        <tr>
+            <td>StartWith</td>
+            <td>'starts'</td>
+        </tr>
+        <tr>
+            <td>EndWith</td>
+            <td>'ends'</td>
+        </tr>
+    </tbody>
+</v-table>
+:::
+
+### Numeric / DateTime Filter Types
+Used for number or date columns (when `filterMode` is `'number'` or `'datetime'`).
 ::: raw
 <v-table>
     <thead>
@@ -214,20 +256,20 @@ import { VDataTable } from 'vuetify/components';
             <td>'neq'</td>
         </tr>
         <tr>
-            <td>StartWith</td>
-            <td>'starts'</td>
+            <td>GreaterThan</td>
+            <td>'gt'</td>
         </tr>
         <tr>
-            <td>Contains</td>
-            <td>'contains'</td>
+            <td>LessThan</td>
+            <td>'lt'</td>
         </tr>
         <tr>
-            <td>NotContains</td>
-            <td>'notcontains'</td>
+            <td>GreaterThanOrEqual</td>
+            <td>'gte'</td>
         </tr>
         <tr>
-            <td>EndWith</td>
-            <td>'ends'</td>
+            <td>LessThanOrEqual</td>
+            <td>'lte'</td>
         </tr>
     </tbody>
 </v-table>
@@ -250,9 +292,19 @@ import { VDataTable } from 'vuetify/components';
             <td>Set when you need dropdown filter and set filter properties against headers props</td>
         </tr>
         <tr>
-            <td>Types</td>
-            <td>'types'</td>
-            <td></td>
+            <td>String</td>
+            <td>'string'</td>
+            <td>Shows text filter types: Contains, Not Contains, Equals, Not Equals, Starts With, Ends With</td>
+        </tr>
+        <tr>
+            <td>Number</td>
+            <td>'number'</td>
+            <td>Shows numeric filter types: Equals, Not Equals, Greater Than, Less Than, Greater Than Or Equal, Less Than Or Equal</td>
+        </tr>
+        <tr>
+            <td>DateTime</td>
+            <td>'datetime'</td>
+            <td>Shows date/time filter types: Equals, Not Equals, Greater Than, Less Than, Greater Than Or Equal, Less Than Or Equal</td>
         </tr>
     </tbody>
 </v-table>
