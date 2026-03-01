@@ -49,11 +49,11 @@
   },
   "dependencies": {
     "vue": "3.5.25",
-    "vuetify": "3.11.9"
+    "vuetify": "4.0.0"
   },
   "peerDependencies": {
     "vue": "3.5.25",
-    "vuetify": "3.11.9"
+    "vuetify": "4.0.0"
   },
   "devDependencies": {
     "@types/node": "^24.5.2",
