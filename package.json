@@ -48,11 +48,11 @@
     "docs:serve": "vitepress serve documentation"
   },
   "dependencies": {
-    "vue": "3.5.25",
+    "vue": "3.5.30",
     "vuetify": "3.11.9"
   },
   "peerDependencies": {
-    "vue": "3.5.25",
+    "vue": "3.5.30",
     "vuetify": "3.11.9"
   },
   "devDependencies": {
